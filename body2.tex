@@ -1,0 +1,467 @@
+\section{Motivation}
+
+If vectors are the standard container for data, \emph{matrices} are the standard container for everything
+that is two-dimensional — or that \emph{acts} on data. This makes them, with little exaggeration, the
+central data structure of computing:
+
+\begin{itemize}
+\item a greyscale \textbf{image} is a matrix of pixel intensities, and image filters (blur, sharpen, edge
+detection) are matrix operations;
+\item a \textbf{graph} — a road network, a social network, the web — is stored as its \emph{adjacency
+matrix}, whose $ij$-entry records the connection between node $i$ and node $j$; counting walks, routing
+flows and ranking nodes all become matrix computations (Chapter~\ref{ch:eigen} makes this concrete with
+Google's PageRank);
+\item a layer of a \textbf{neural network} is a matrix of weights: an input vector is multiplied by the
+matrix, a simple non-linear function is applied, and the result is passed to the next layer.
+``Training'' a network means nothing else than adjusting the entries of its matrices;
+\item a \textbf{spreadsheet}, a database table, the term--document table inside a search engine — matrices
+again.
+\end{itemize}
+
+The strangest-looking definition of this chapter — the row-by-column rule for \emph{multiplying} matrices —
+is also its most consequential one. It is designed precisely so that multiplication of matrices corresponds
+to \emph{composition} of transformations (we prove this in Chapter~\ref{ch:linear-mappings}), and its
+central role in graphics and machine learning explains a striking fact about modern hardware: GPUs, the
+chips that power both video games and the training of large AI models, are at heart machines optimised for
+one task — multiplying enormous matrices fast. Even the theory is still alive: the true asymptotic
+complexity of matrix multiplication (naively $O(n^3)$, improved to about $O(n^{2.81})$ by Strassen's
+recursive algorithm) remains a famous open problem of theoretical computer science.
+
+Towards the end of the chapter we develop \emph{elementary operations}, \emph{echelon forms} and the
+notion of \emph{rank}. Rank measures the genuine information content of a matrix: a $1000\times 1000$
+matrix of rank $20$ can be reconstructed from roughly $40\,000$ numbers instead of a million. Low rank is
+the compressible structure hiding in most real-world data — and the algorithm that computes it, row
+reduction, is the same engine that will solve systems of equations in Chapter~\ref{ch:sole} and invert
+matrices in Chapter~\ref{ch:determinants}.
+
+\section{Matrices}
+
+\begin{definition}
+A \emph{matrix of size $m\times n$ over a field $\K$} (or simply a \emph{matrix}) is a rectangular table of
+elements $a_{ij}\in\K$ for $i=1,\ldots,m$, $j=1,\ldots,n$:
+\[
+\left( \begin{array}{cccc}
+a_{11} & a_{12} & \ldots & a_{1n} \\
+a_{21} & a_{22} & \ldots & a_{2n} \\
+\vdots & \vdots & \ddots & \vdots \\
+a_{m1} & a_{m2} & \ldots & a_{mn}
+\end{array} \right).
+\]
+We denote this matrix by $(a_{ij})_{m\times n}$ or simply $(a_{ij})$. The element $a_{ij}$ is called the
+\emph{$ij$-entry}. Matrices are usually denoted by capital letters $A,B,\ldots$. Two matrices $A,B$ are
+\emph{equal} (written $A=B$) if they have the same size and the same $ij$-entries. The set of matrices of size
+$m\times n$ over $\K$ is denoted by $\K_m^n$.
+\end{definition}
+
+\begin{definition}
+Given a matrix $(a_{ij})_{m\times n}$, the $n$-tuples
+\[
+(a_{11}, a_{12}, \ldots, a_{1n}),\ \ldots,\ (a_{m1}, a_{m2}, \ldots, a_{mn})
+\]
+are its \emph{rows}, and the $m$-tuples
+\[
+\left( \begin{array}{c} a_{11}\\ a_{21} \\ \vdots \\ a_{m1} \end{array} \right), \ldots,
+\left( \begin{array}{c} a_{1n} \\ a_{2n} \\ \vdots \\ a_{mn} \end{array} \right)
+\]
+are its \emph{columns}.
+\end{definition}
+
+\begin{example}
+The matrix
+\[
+\left( \begin{array}{ccc}
+1 & 0 & 2 \\
+-3 & \tfrac{1}{2} & 4
+\end{array} \right)
+\]
+is a $2\times 3$ matrix over $\R$. Its rows are $(1 , 0 , 2)$ and $(-3 , \tfrac{1}{2}, 4)$, and its columns are
+\[
+\left( \begin{array}{c} 1 \\ -3 \end{array} \right),\quad
+\left( \begin{array}{c} 0 \\ \tfrac{1}{2} \end{array} \right),\quad
+\left( \begin{array}{c} 2 \\ 4 \end{array} \right).
+\]
+\end{example}
+
+\begin{fact}
+Let $A$ be an $m\times n$ matrix over a field $\K$. The rows of $A$ are members of the vector space $\K^n$ and
+the columns are members of $\K^m$.
+\end{fact}
+
+\begin{definition}
+An $m\times n$ matrix is called a \emph{square matrix} if $m=n$. A square matrix is \emph{symmetric} if
+$a_{ij}=a_{ji}$ for all $i,j=1,\ldots,n$. The $n$-tuple $(a_{11},a_{22},\ldots,a_{nn})$ is called the
+\emph{main diagonal} of a square matrix $(a_{ij})_{n\times n}$.
+\end{definition}
+
+\begin{example}
+The following are square matrices, the second one symmetric:
+\[
+\left( \begin{array}{cc} 1 & 0 \\ -3 & \tfrac{1}{2} \end{array} \right), \qquad
+\left( \begin{array}{cc} 1 & -3 \\ -3 & 1 \end{array} \right).
+\]
+\end{example}
+
+\begin{definition}
+A square matrix $A = (a_{ij})_{n\times n}$ is called
+\begin{itemize}
+\item \emph{diagonal} if $a_{ij} = 0$ for all $i\neq j$;
+\item \emph{upper triangular} if $a_{ij} = 0$ for all $i>j$ (all entries below the main diagonal are zero);
+\item \emph{lower triangular} if $a_{ij} = 0$ for all $i<j$.
+\end{itemize}
+\end{definition}
+
+\begin{example}
+The matrices
+\[
+\left( \begin{array}{cc} 2 & 0 \\ 0 & -1 \end{array} \right), \qquad
+\left( \begin{array}{ccc} 1 & 5 & 0 \\ 0 & 2 & -1 \\ 0 & 0 & 3 \end{array} \right)
+\]
+are diagonal and upper triangular, respectively. Every diagonal matrix is both upper and lower triangular.
+\end{example}
+
+\section{Matrix operations}
+
+\begin{definition}[Addition]
+Let $A=(a_{ij})$ and $B=(b_{ij})$ be two matrices of the same size $m\times n$. The \emph{sum} of $A$ and $B$,
+denoted $A+B$, is the matrix
+\[
+A+B = (a_{ij}+b_{ij})_{m\times n}.
+\]
+\end{definition}
+
+\begin{definition}[Scalar multiplication]
+The \emph{product} of a matrix $A=(a_{ij})$ by a scalar $k\in \K$, denoted $k\cdot A$, is the matrix
+$k\cdot A = (k\,a_{ij})$. We write $-A := (-1)\cdot A$ and $A-B := A+(-B)$.
+\end{definition}
+
+\begin{example}
+\[
+\left( \begin{array}{ccc} 1 & 0 & 2 \\ -3 & \tfrac{1}{2} & 4 \end{array} \right)
++
+\left( \begin{array}{ccc} -3 & 1 & 4 \\ 2 & \tfrac{3}{2} & 0 \end{array} \right) =
+\left( \begin{array}{ccc} -2 & 1 & 6 \\ -1 & 2 & 4 \end{array} \right),
+\qquad
+3\cdot \left( \begin{array}{ccc} 1 & 0 & 2 \\ -3 & \tfrac{1}{2} & 4 \end{array} \right)
+=
+\left( \begin{array}{ccc} 3 & 0 & 6 \\ -9 & \tfrac{3}{2} & 12 \end{array} \right).
+\]
+\end{example}
+
+\begin{warning}
+Addition of matrices of different sizes is \emph{not} defined.
+\end{warning}
+
+\begin{definition}
+The $m\times n$ matrix with all entries equal to zero is called the \emph{zero matrix} and is denoted by
+$0_{m\times n}$, or simply $0$ when the size is clear from the context.
+\end{definition}
+
+\begin{theorem}
+Let $A,B,C$ be $m\times n$ matrices over a field $\K$ and let $k_1,k_2\in \K$. Then
+\[
+\begin{aligned}
+&A+0 = 0+A =A, &&k_1(A+B) = k_1\cdot A+k_1\cdot B,\\
+&(A+B)+C = A+(B+C), &&(k_1+k_2)A = k_1\cdot A+k_2\cdot A,\\
+&A+B = B+A, &&(k_1 k_2)A = k_1(k_2\cdot A),\\
+&A-A = 0, && 1\cdot A = A.
+\end{aligned}
+\]
+\end{theorem}
+
+\begin{definition}[Matrix multiplication]
+Let $A$ be a $k\times m$ matrix and $B$ an $m\times n$ matrix. The \emph{product} $A\cdot B$ is the
+$k\times n$ matrix $C=(c_{ij})$ whose entries are
+\[
+c_{ij} = a_{i1}b_{1j}+a_{i2}b_{2j}+\ldots + a_{im}b_{mj}, \qquad i=1,\ldots,k,\ \ j=1,\ldots,n.
+\]
+\end{definition}
+
+\begin{warning}
+The product $A\cdot B$ is defined \emph{only} when the number of columns of $A$ equals the number of rows of
+$B$.
+\end{warning}
+
+\begin{example}
+Let
+\[
+A = \left( \begin{array}{ccc} 1 & 0 & 2 \\ 2 & 1 & 3 \end{array} \right), \qquad
+B = \left( \begin{array}{cc} 1 & 2 \\ 0 & 1 \\ 1 & 0 \end{array} \right).
+\]
+Here $A$ is $2\times 3$ and $B$ is $3\times 2$, so both products are defined: $A\cdot B$ is $2\times 2$ and
+$B\cdot A$ is $3\times 3$. We compute
+\[
+A\cdot B = \left( \begin{array}{cc}
+1\cdot 1+0\cdot 0+2\cdot 1 & 1\cdot 2+0\cdot 1+2\cdot 0 \\
+2\cdot 1+1\cdot 0+3\cdot 1 & 2\cdot 2+1\cdot 1+3\cdot 0
+\end{array} \right)
+= \left( \begin{array}{cc} 3 & 2 \\ 5 & 5 \end{array} \right),
+\qquad
+B\cdot A = \left( \begin{array}{ccc} 5 & 2 & 8 \\ 2 & 1 & 3 \\ 1 & 0 & 2 \end{array} \right).
+\]
+In particular, $A\cdot B$ and $B\cdot A$ need not even have the same size.
+\end{example}
+
+\begin{remark}
+All of matrix algebra works verbatim over \emph{any} field $\K$ — including the finite fields $\Z_p$ —
+and the same is true of everything that follows in this book: row reduction, rank, systems of linear
+equations, determinants and inverses. Over $\Z_p$ one simply reduces modulo $p$ at every step.
+\end{remark}
+
+\begin{example}[Matrices over a finite field]
+Over the field $\Z_5$,
+\[
+\left( \begin{array}{cc} 2 & 3 \\ 4 & 1 \end{array} \right)
+\left( \begin{array}{cc} 1 & 4 \\ 2 & 3 \end{array} \right)
+= \left( \begin{array}{cc} 2+6 & 8+9 \\ 4+2 & 16+3 \end{array} \right)
+= \left( \begin{array}{cc} 3 & 2 \\ 1 & 4 \end{array} \right),
+\]
+since $8 \equiv 3$, $17 \equiv 2$, $6\equiv 1$ and $19 \equiv 4$ modulo $5$.
+\end{example}
+
+\begin{definition}
+The square matrix of size $n\times n$ of the form
+\[
+\left( \begin{array}{cccc}
+1 & 0 & \ldots & 0 \\
+0 & 1 & \ldots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \ldots & 1
+\end{array} \right)
+\]
+is called the \emph{identity matrix} and is denoted by $I_{n\times n}$ or $I$.
+\end{definition}
+
+\begin{theorem}[Properties of multiplication]
+Let $A,A_1$ be $k\times m$ matrices, $B,B_1$ be $m\times n$ matrices and $C$ be an $n\times o$ matrix. Then
+\[
+\begin{aligned}
+& (A\cdot B)\cdot C = A\cdot (B\cdot C),\\
+& A\cdot I_{m\times m} = I_{k\times k} \cdot A = A,\\
+& (A+A_1)\cdot B = A \cdot B +A_1\cdot B,\\
+& A\cdot (B+B_1) = A \cdot B +A\cdot B_1.
+\end{aligned}
+\]
+\end{theorem}
+
+\begin{warning}
+For $A,B\in \K_n^n$ multiplication is in general \emph{not commutative}: sometimes $A\cdot B \neq B\cdot A$.
+\end{warning}
+
+\begin{example}
+Even for square matrices the order of multiplication matters:
+\[
+\left( \begin{array}{cc} 0 & 1 \\ 0 & 0 \end{array} \right)
+\left( \begin{array}{cc} 0 & 0 \\ 1 & 0 \end{array} \right)
+= \left( \begin{array}{cc} 1 & 0 \\ 0 & 0 \end{array} \right),
+\qquad
+\left( \begin{array}{cc} 0 & 0 \\ 1 & 0 \end{array} \right)
+\left( \begin{array}{cc} 0 & 1 \\ 0 & 0 \end{array} \right)
+= \left( \begin{array}{cc} 0 & 0 \\ 0 & 1 \end{array} \right).
+\]
+\end{example}
+
+\begin{warning}
+A product of two non-zero matrices can be the zero matrix: for
+$A = \left( \begin{smallmatrix} 0 & 1 \\ 0 & 0 \end{smallmatrix} \right)$ we have $A\neq 0$ but
+$A\cdot A = 0$. Consequently, one cannot cancel in matrix equations: $A\cdot B = A\cdot C$ does \emph{not}
+imply $B = C$.
+\end{warning}
+
+\begin{definition}[Transpose]
+Let $A=(a_{ij})$ be an $m\times n$ matrix. The \emph{transpose} of $A$, denoted $A^T$, is the $n\times m$
+matrix obtained by interchanging rows and columns:
+\[
+\left( \begin{array}{cccc}
+a_{11} & a_{12} & \ldots & a_{1n} \\
+a_{21} & a_{22} & \ldots & a_{2n} \\
+\vdots & \vdots & \ddots & \vdots \\
+a_{m1} & a_{m2} & \ldots & a_{mn}
+\end{array} \right)^T =
+\left( \begin{array}{cccc}
+a_{11} & a_{21} & \ldots & a_{m1} \\
+a_{12} & a_{22} & \ldots & a_{m2} \\
+\vdots & \vdots & \ddots & \vdots \\
+a_{1n} & a_{2n} & \ldots & a_{mn}
+\end{array} \right).
+\]
+\end{definition}
+
+\begin{example}
+\[
+\left( \begin{array}{ccc} 1 & 0 & 2 \\ -3 & \tfrac{1}{2} & 4 \end{array} \right)^T =
+\left( \begin{array}{cc} 1 & -3 \\ 0 & \tfrac{1}{2} \\ 2 & 4 \end{array} \right).
+\]
+\end{example}
+
+\begin{fact}
+A square matrix $A$ is symmetric if and only if $A^T=A$.
+\end{fact}
+
+\begin{theorem}[Properties of the transpose]
+Let $A,B$ be matrices of appropriate sizes and $k$ a scalar. Then
+\[
+(A+B)^T = A^T + B^T, \qquad (A^T)^T = A, \qquad (k\cdot A)^T = k\cdot A^T, \qquad (A\cdot B)^T = B^T\cdot A^T.
+\]
+\end{theorem}
+
+\section{Elementary operations}
+
+\begin{definition}
+By \emph{elementary row operations} on a matrix $A$ we mean the following:
+\begin{enumerate}
+\item \textbf{(Row switching)} the $i$-th and $j$-th rows are interchanged ($R_i\leftrightarrow R_j$);
+\item \textbf{(Row scaling)} each element of the $i$-th row is multiplied by a \emph{nonzero} scalar
+$k\in \K$ ($kR_i\rightarrow R_i$);
+\item \textbf{(Row addition)} the $i$-th row is replaced by the sum of the $i$-th row and a multiple of the
+$j$-th row ($R_i+k\cdot R_j\rightarrow R_i$).
+\end{enumerate}
+\emph{Elementary column operations} are defined analogously.
+\end{definition}
+
+\begin{example}
+\[
+\left( \begin{array}{cccc}
+-3 & 1 & 4 & 2\\ 2 & \tfrac{3}{2} & 0 & 3\\ -3 & 1 & 2 & 1
+\end{array} \right)
+\xrightarrow{R_1\leftrightarrow R_2}
+\left( \begin{array}{cccc}
+2 & \tfrac{3}{2} & 0 & 3\\ -3 & 1 & 4 & 2\\ -3 & 1 & 2 & 1
+\end{array} \right)
+\xrightarrow{3R_2\to R_2}
+\left( \begin{array}{cccc}
+2 & \tfrac{3}{2} & 0 & 3\\ -9 & 3 & 12 & 6\\ -3 & 1 & 2 & 1
+\end{array} \right)
+\xrightarrow{R_2+2R_1\to R_2}
+\left( \begin{array}{cccc}
+2 & \tfrac{3}{2} & 0 & 3\\ -5 & 6 & 12 & 12\\ -3 & 1 & 2 & 1
+\end{array} \right).
+\]
+\end{example}
+
+\begin{theorem}
+Each elementary row (column) operation is invertible, and its inverse is again an elementary row (resp.\
+column) operation.
+\end{theorem}
+
+\begin{proof}
+\begin{enumerate}
+\item The inverse of $R_i\leftrightarrow R_j$ is $R_j\leftrightarrow R_i$.
+\item The inverse of $k\cdot R_i\rightarrow R_i$ (with $k\neq 0$) is $\tfrac{1}{k}\cdot R_i\rightarrow R_i$.
+\item The inverse of $R_i+k\cdot R_j\rightarrow R_i$ is $R_i-k\cdot R_j\rightarrow R_i$.
+\end{enumerate}
+Replacing the letter $R$ by $C$ gives the proof for elementary column operations.
+\end{proof}
+
+\begin{definition}
+Two matrices $A$ and $B$ of the same size are \emph{row equivalent} if one can be obtained from the other
+using elementary row operations.
+\end{definition}
+
+\section{Row echelon form and rank}
+
+\begin{definition}
+A matrix $A$ is in \emph{row echelon form} if
+\begin{enumerate}
+\item all zero rows are at the bottom, and
+\item the first nonzero entry in the $i$-th row lies to the right of the first nonzero entry of the row above
+it.
+\end{enumerate}
+\end{definition}
+
+\begin{example}
+The matrix
+\[
+\left( \begin{array}{cccc}
+2 & 1 & 0 & 3\\ 0 & 6 & 12 & 12\\ 0 & 0 & 2 & 1 \\ 0 & 0 & 0 & 0
+\end{array} \right)
+\]
+is in row echelon form.
+\end{example}
+
+\begin{fact}
+Any matrix $A$ is row equivalent to a matrix in row echelon form.
+\end{fact}
+
+\begin{example}
+\[
+\left( \begin{array}{ccc}
+1 & 0 & 2\\ 2 & -1 & 3\\ 4 & 1 & 8
+\end{array} \right)
+\xrightarrow{R_2-2R_1\to R_2}
+\left( \begin{array}{ccc}
+1 & 0 & 2\\ 0 & -1 & -1\\ 4 & 1 & 8
+\end{array} \right)
+\xrightarrow{R_3-4R_1\to R_3}
+\left( \begin{array}{ccc}
+1 & 0 & 2\\ 0 & -1 & -1\\ 0 & 1 & 0
+\end{array} \right)
+\xrightarrow{R_3+R_2\to R_3}
+\left( \begin{array}{ccc}
+1 & 0 & 2\\ 0 & -1 & -1\\ 0 & 0 & -1
+\end{array} \right).
+\]
+\end{example}
+
+\begin{definition}
+Let $A$ be an $m\times n$ matrix over $\K$. The \emph{row rank} of $A$ is the dimension of the subspace of
+$\K^n$ spanned by the rows of $A$. The \emph{column rank} of $A$ is the dimension of the subspace of $\K^m$
+spanned by the columns of $A$.
+\end{definition}
+
+\begin{theorem}
+For every matrix $A$ the row rank of $A$ equals the column rank of $A$.
+\end{theorem}
+
+\begin{definition}
+The \emph{rank} of a matrix $A$, denoted $\rank(A)$, is its row rank (equivalently, its column rank).
+\end{definition}
+
+\begin{example}
+Consider $A=\left( \begin{smallmatrix} 1 & 2\\ 2 & 4 \end{smallmatrix} \right)$. Then
+\[
+\dim\big(\Span{\{(1,2),(2,4)\}}\big) = \dim\{a(1,2)+b(2,4)\mid a,b\in \R\}
+= \dim\{(a+2b)(1,2)\mid a,b\in \R\} = \dim\big(\Span{\{(1,2)\}}\big)=1.
+\]
+Hence $\rank(A)=1$.
+\end{example}
+
+\begin{theorem}
+If a matrix $A$ is row equivalent to a matrix $B$, then $\rank(A)=\rank(B)$.
+\end{theorem}
+
+\begin{theorem}
+Let $A$ be a matrix. The number of nonzero rows in a row echelon form which is row equivalent to $A$ equals
+$\rank(A)$.
+\end{theorem}
+
+\begin{example}
+We compute the rank of a $3\times 4$ matrix by row reduction:
+\[
+A = \left( \begin{array}{cccc} 1 & 2 & 1 & 0 \\ 2 & 4 & 3 & 1 \\ 3 & 6 & 4 & 1 \end{array} \right)
+\xrightarrow{\substack{R_2-2R_1\to R_2\\ R_3-3R_1\to R_3}}
+\left( \begin{array}{cccc} 1 & 2 & 1 & 0 \\ 0 & 0 & 1 & 1 \\ 0 & 0 & 1 & 1 \end{array} \right)
+\xrightarrow{R_3-R_2\to R_3}
+\left( \begin{array}{cccc} 1 & 2 & 1 & 0 \\ 0 & 0 & 1 & 1 \\ 0 & 0 & 0 & 0 \end{array} \right).
+\]
+The row echelon form has two nonzero rows, so $\rank(A) = 2$.
+\end{example}
+
+\begin{theorem}
+The dimension of the subspace $W$ of $\K^n$ spanned by vectors $\vv_1,\ldots, \vv_m$ equals the rank of the
+matrix
+\[
+\left( \begin{array}{c} \vv_1\\ \vdots \\ \vv_m \end{array} \right).
+\]
+\end{theorem}
+
+\begin{example}
+What is the dimension of $W = \Span{\{(1,2,1),(2,4,3),(3,6,4)\}}\subseteq \R^3$? Writing the vectors as the
+rows of a matrix and row reducing,
+\[
+\left( \begin{array}{ccc} 1 & 2 & 1 \\ 2 & 4 & 3 \\ 3 & 6 & 4 \end{array} \right)
+\longrightarrow
+\left( \begin{array}{ccc} 1 & 2 & 1 \\ 0 & 0 & 1 \\ 0 & 0 & 0 \end{array} \right),
+\]
+we get $\dim(W) = 2$. Moreover, the nonzero rows $(1,2,1)$ and $(0,0,1)$ of the echelon form constitute a
+basis of $W$.
+\end{example}

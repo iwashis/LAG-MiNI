@@ -1,0 +1,393 @@
+\section{Motivation}
+
+A matrix acting on a space moves every vector somewhere else, and at first sight the motion is a mess.
+Eigenvectors are the directions in which the mess disappears: along an eigenvector the matrix acts as mere
+scaling by a number — the eigenvalue. Finding these special directions means finding the natural
+coordinate system of a transformation, the axes along which its behaviour is simplest. It is hard to
+overstate how often computing profits from this one idea:
+
+\begin{itemize}
+\item \textbf{Ranking the web.} Google's founding insight was that the importance of a web page is an
+eigenvector computation: importance flows along links, and a stable assignment of importances is precisely
+an eigenvector of the web's matrix for the eigenvalue $1$. The final section of this chapter works this
+out in detail.
+\item \textbf{Dimensionality reduction.} Principal Component Analysis (PCA), a staple of data science,
+computes the eigenvectors of a data set's covariance matrix: they are the directions along which the data
+genuinely varies, and the eigenvalues say by how much. Keeping only the few directions with the largest
+eigenvalues compresses the data with minimal loss — the classic ``eigenfaces'' method recognised human
+faces this way.
+\item \textbf{Repeated processes.} Whatever evolves in discrete steps by a fixed linear rule — a Markov
+chain, a population model, the pair of previous terms in the Fibonacci recurrence — evolves by matrix
+powers $A^k$. Eigenvalues make such powers computable in closed form (see the section on diagonalisation),
+and the largest eigenvalue governs the long-run fate of the process: growth, decay or convergence to a
+steady state. In essence this is also why eigenvalues decide the stability of physical systems, and why
+they appear when engineers ask whether a bridge will resonate in the wind.
+\item \textbf{Graphs and clustering.} The eigenvalues of matrices associated with a graph reveal its
+global shape: how well connected it is and whether it splits into communities. \emph{Spectral clustering}
+and much of modern network analysis are built on this.
+\end{itemize}
+
+Within this book, eigenvalues are also a grand finale in a literal sense: computing them exercises
+everything that came before. The eigenvalue condition is a determinant equation
+(Chapter~\ref{ch:determinants}); its solutions are the roots of a polynomial, which may force us into the
+complex numbers of Chapter~\ref{ch:complex}; and finding the eigenvectors for each eigenvalue means
+solving a homogeneous linear system (Chapter~\ref{ch:sole}) whose solution set is a subspace
+(Chapter~\ref{ch:vector-spaces}).
+
+\section{Eigenvalues and eigenvectors}
+
+\begin{definition}
+Let $A$ be an $n\times n$ matrix over the field $\K$. A scalar $\lambda\in \K$ is called an \emph{eigenvalue}
+of $A$ if there is a non-zero vector $\vv\in \K^n$ such that
+\[
+A\vv= \lambda \cdot \vv.
+\]
+\end{definition}
+
+In computations one uses the following equivalent characterisation.
+
+\begin{theorem}
+Let $A$ be an $n\times n$ matrix over the field $\K$. A scalar $\lambda\in \K$ is an eigenvalue of $A$ if
+and only if
+\[
+\det(A-\lambda \cdot I) = 0.
+\]
+\end{theorem}
+
+\begin{proof}
+($\Rightarrow$) Let $\vv$ be a non-zero vector with $A\vv = \lambda\cdot \vv$. Then
+\[
+A\vv - \lambda\cdot \vv = \0, \qquad (A - \lambda \cdot I)\cdot \vv = \0,
+\]
+so the system $(A - \lambda \cdot I)X = \0$ has a non-zero solution. This happens precisely when
+$\det(A - \lambda \cdot I)=0$.
+
+($\Leftarrow$) Assume $\det(A - \lambda \cdot I)=0$. Then the system $(A - \lambda \cdot I)X = \0$ has a
+non-zero solution $\vv$, and
+\[
+(A - \lambda \cdot I)\cdot \vv = \0, \qquad A\vv - \lambda\cdot \vv = \0, \qquad A\vv = \lambda\cdot \vv. \qedhere
+\]
+\end{proof}
+
+\begin{definition}
+The polynomial
+\[
+p_A(\lambda) = \det(A-\lambda\cdot I)
+\]
+(a polynomial of degree $n$ in the variable $\lambda$) is called the \emph{characteristic polynomial} of
+$A$. The eigenvalues of $A$ are exactly the roots of $p_A$ lying in $\K$.
+\end{definition}
+
+\begin{fact}
+Similar matrices have the same characteristic polynomial: if $B = P^{-1}AP$, then
+\[
+p_B(\lambda) = \det(P^{-1}AP - \lambda I) = \det\big(P^{-1}(A-\lambda I)P\big)
+= \det(P^{-1})\cdot\det(A-\lambda I)\cdot\det(P) = p_A(\lambda).
+\]
+\end{fact}
+
+\begin{remark}[Eigenvalues of a linear operator]
+For a linear operator $F\colon\V\to\V$, eigenvalues and eigenvectors are defined by the same condition
+$F(\vv) = \lambda\cdot\vv$ (with $\vv\neq\0$). They are computed from the matrix of $F$ in \emph{any}
+basis $S$: the matrices $M_S(F)$ in different bases are similar (Chapter~\ref{ch:linear-mappings}), so by
+the fact above they all have the same characteristic polynomial and hence the same eigenvalues.
+\end{remark}
+
+\begin{definition}
+A non-zero vector $\vv\in \K^n$ is called an \emph{eigenvector} for the eigenvalue $\lambda$ if
+$A\cdot \vv = \lambda \cdot \vv$.
+\end{definition}
+
+\begin{theorem}
+Let $\lambda$ be an eigenvalue of $A$. The set $W_\lambda$ of all eigenvectors for $\lambda$ (together with
+$\0$) is a subspace of $\K^n$.
+\end{theorem}
+
+\begin{proof}
+Note that $\0\in W_\lambda$. For $\vv_1,\vv_2\in W_\lambda$,
+\[
+A(\vv_1+\vv_2)=A\vv_1+A\vv_2=\lambda\cdot \vv_1+\lambda\cdot \vv_2 = \lambda \cdot (\vv_1+\vv_2),
+\]
+so $\vv_1+\vv_2\in W_\lambda$. Similarly, for $\vv\in W_\lambda$ and $k\in \K$ we have
+$A(k\vv)=kA\vv=k\lambda\vv=\lambda(k\vv)$, so $k\cdot \vv\in W_\lambda$.
+\end{proof}
+
+\section{Computing eigenvalues and eigenvectors}
+
+The recipe is always the same: find the roots of the characteristic polynomial $p_A(\lambda)$, and for each
+root $\lambda$ solve the homogeneous system $(A-\lambda I)X = \0$ to find the eigenvectors.
+
+\begin{example}[A $2\times 2$ matrix]
+Let $A = \left( \begin{smallmatrix} 2 & 1\\ 1 & 2 \end{smallmatrix} \right)$ over $\R$. Then
+\[
+p_A(\lambda) = \left| \begin{array}{cc} 2-\lambda & 1\\ 1 & 2-\lambda \end{array} \right|
+= (2-\lambda)^2 - 1 = \lambda^2-4\lambda+3 = (\lambda-1)(\lambda-3),
+\]
+so the eigenvalues are $\lambda = 1$ and $\lambda = 3$.
+
+\medskip
+\noindent\emph{Eigenvectors for $\lambda = 1$.} The system $(A-I)X = \0$ reads $x+y = 0$ (twice), so
+\[
+W_1 = \Big\{ \left( \begin{array}{c} t \\ -t \end{array} \right) \;\Big|\; t\in \R \Big\}.
+\]
+
+\noindent\emph{Eigenvectors for $\lambda = 3$.} The system $(A-3I)X = \0$ reads $-x+y = 0$, so
+\[
+W_3 = \Big\{ \left( \begin{array}{c} t \\ t \end{array} \right) \;\Big|\; t\in \R \Big\}.
+\]
+Indeed, $A\left( \begin{smallmatrix} 1\\ 1 \end{smallmatrix} \right)
+= \left( \begin{smallmatrix} 3\\ 3 \end{smallmatrix} \right)
+= 3 \left( \begin{smallmatrix} 1\\ 1 \end{smallmatrix} \right)$.
+\end{example}
+
+\begin{example}[A $3\times 3$ matrix]
+Let
+\[
+A=\left( \begin{array}{ccc} 1 & 0 & 2\\ 0 & -1 & 3\\ 0 & 1 & 1 \end{array} \right),
+\qquad
+A-\lambda \cdot I=\left( \begin{array}{ccc} 1-\lambda & 0 & 2\\ 0 & -1-\lambda & 3\\ 0 & 1 & 1-\lambda \end{array} \right).
+\]
+Expanding along the first column,
+\[
+\det(A-\lambda \cdot I)=
+(1-\lambda)\cdot \left| \begin{array}{cc} -1-\lambda & 3\\ 1 & 1-\lambda \end{array} \right|
+= (1-\lambda)\big((-1-\lambda)(1-\lambda)-3\big)
+= (1-\lambda)(\lambda^2-4) = (1-\lambda)(\lambda-2)(\lambda+2).
+\]
+The eigenvalues of $A$ are therefore $\lambda = 1,\ 2,\ -2$.
+
+\medskip
+\noindent\emph{Eigenvectors for $\lambda = 1$.} They are the solutions of
+\[
+\left( \begin{array}{ccc} 0 & 0 & 2\\ 0 & -2 & 3\\ 0 & 1 & 0 \end{array} \right)X = \0
+\xrightarrow{\ \text{row reduction}\ }
+\left( \begin{array}{ccc} 0 & 1 & 0 \\ 0 & 0 & 1\\ 0 & 0 & 0 \end{array} \right)X = \0,
+\qquad
+W_1 = \Big\{ \left( \begin{array}{c} x \\ 0 \\ 0 \end{array} \right) \;\Big|\; x\in \R \Big\}.
+\]
+
+\noindent\emph{Eigenvectors for $\lambda = 2$.} They are the solutions of
+\[
+\left( \begin{array}{ccc} -1 & 0 & 2\\ 0 & -3 & 3\\ 0 & 1 & -1 \end{array} \right)X = \0
+\xrightarrow{\ \text{row reduction}\ }
+\left( \begin{array}{ccc} 1 & 0 & -2\\ 0 & 1 & -1\\ 0 & 0 & 0 \end{array} \right)X = \0,
+\qquad
+W_2 = \Big\{ \left( \begin{array}{c} 2z \\ z \\ z \end{array} \right) \;\Big|\; z\in \R \Big\}.
+\]
+
+\noindent\emph{Eigenvectors for $\lambda = -2$.} They are the solutions of
+\[
+\left( \begin{array}{ccc} 3 & 0 & 2\\ 0 & 1 & 3\\ 0 & 1 & 3 \end{array} \right)X = \0
+\xrightarrow{\ \text{row reduction}\ }
+\left( \begin{array}{ccc} 1 & 0 & \tfrac{2}{3}\\ 0 & 1 & 3\\ 0 & 0 & 0 \end{array} \right)X = \0,
+\qquad
+W_{-2} = \Big\{ \left( \begin{array}{c} -\tfrac{2}{3}z \\ -3z \\ z \end{array} \right) \;\Big|\; z\in \R \Big\}.
+\]
+\end{example}
+
+\begin{fact}
+For an $n\times n$ matrix $A$ there are at most $n$ distinct eigenvalues of $A$ (the characteristic
+polynomial has degree $n$, so it has at most $n$ roots).
+\end{fact}
+
+\begin{fact}
+The eigenvalues of an upper (or lower) triangular matrix are exactly its diagonal entries: for a triangular
+$A$ the matrix $A-\lambda I$ is again triangular, so
+\[
+p_A(\lambda) = (a_{11}-\lambda)(a_{22}-\lambda)\cdots(a_{nn}-\lambda).
+\]
+\end{fact}
+
+\begin{remark}
+It may happen that a matrix $A$ has no eigenvalues over a field $\K$, or that some eigenvalues are multiple.
+\end{remark}
+
+\begin{example}[No real eigenvalues]
+Consider $A = \left( \begin{smallmatrix} 0 & -1\\ 1 & 0 \end{smallmatrix} \right)$ over $\R$. Then
+\[
+\det(A-\lambda\cdot I) = \left| \begin{array}{cc} -\lambda & -1\\ 1 & -\lambda \end{array} \right| = \lambda^2 + 1.
+\]
+The equation $\lambda^2+1 = 0$ has no solution over $\R$, so $A$ has no real eigenvalues.
+\end{example}
+
+\begin{example}[Complex eigenvalues]
+The same matrix $A = \left( \begin{smallmatrix} 0 & -1\\ 1 & 0 \end{smallmatrix} \right)$ — the rotation by
+$\tfrac\pi2$ — viewed over $\K = \C$ does have eigenvalues: $\lambda^2+1 = 0$ gives $\lambda = \pm i$. For
+$\lambda = i$ the system $(A-iI)X=\0$ reads $-ix - y = 0$, so $(1,-i)^T$ is an eigenvector. By the
+Fundamental Theorem of Algebra, over $\C$ every square matrix has at least one eigenvalue.
+\end{example}
+
+\begin{example}[A multiple eigenvalue]
+For the $3\times 3$ identity matrix $I$,
+\[
+\det(I-\lambda\cdot I) = \left| \begin{array}{ccc} 1-\lambda & 0 & 0\\ 0 & 1-\lambda & 0 \\ 0 & 0 & 1-\lambda \end{array} \right| = (1-\lambda)^3,
+\]
+so the only eigenvalue is $\lambda = 1$ (with multiplicity $3$).
+\end{example}
+
+\begin{fact}
+If $\lambda$ is an eigenvalue of $A$, then it is also an eigenvalue of $A^T$.
+\end{fact}
+
+\begin{fact}[Trace and determinant]
+Let $A$ be an $n\times n$ matrix over $\C$ with eigenvalues $\lambda_1,\ldots,\lambda_n$ listed with
+multiplicities. Then
+\[
+\lambda_1 \lambda_2 \cdots \lambda_n = \det(A), \qquad
+\lambda_1+ \lambda_2 +\ldots+ \lambda_n = a_{11}+a_{22}+\ldots+a_{nn}
+\]
+(the sum of the diagonal entries of $A$ is called the \emph{trace} of $A$). For a $2\times 2$ matrix these
+two quantities already determine the characteristic polynomial:
+\[
+p_A(\lambda) = \lambda^2 - (a_{11}+a_{22})\,\lambda + \det(A).
+\]
+\end{fact}
+
+\begin{theorem}
+Eigenvectors corresponding to pairwise distinct eigenvalues are linearly independent: if
+$\lambda_1,\ldots,\lambda_k$ are distinct eigenvalues of $A$ and $\vv_1,\ldots,\vv_k$ are corresponding
+eigenvectors, then the set $\{\vv_1,\ldots,\vv_k\}$ is linearly independent.
+\end{theorem}
+
+\section{Geometric interpretation}
+
+Eigenvectors of a matrix $A$ are the directions left unchanged (up to scaling) by the linear mapping
+$\vv\mapsto A\vv$. The figure below illustrates the action of a shear mapping: the horizontal vector is an
+eigenvector (its direction is preserved), whereas the other vector changes direction.
+
+\begin{center}
+\includegraphics[scale=0.8]{Eigenvectors.png}
+\end{center}
+
+\section{Diagonalisation}
+
+\begin{definition}
+An $n\times n$ matrix $A$ over $\K$ is \emph{diagonalisable} if there exists an invertible matrix $P$ such
+that $P^{-1}\cdot A\cdot P$ is a diagonal matrix.
+\end{definition}
+
+\begin{theorem}
+An $n\times n$ matrix $A$ over $\K$ is diagonalisable if and only if $\K^n$ has a basis
+$\{\vv_1,\ldots,\vv_n\}$ consisting of eigenvectors of $A$. In that case one may take
+$P = (\vv_1\ \vv_2\ \ldots\ \vv_n)$, the matrix with the eigenvectors as columns, and then
+\[
+P^{-1}\, A\, P = \left( \begin{array}{cccc}
+\lambda_1 & 0 & \ldots & 0\\ 0 & \lambda_2 & \ldots & 0\\ \vdots & \vdots & \ddots & \vdots\\ 0 & 0 & \ldots & \lambda_n
+\end{array} \right) =: D,
+\]
+where $\lambda_i$ is the eigenvalue corresponding to the eigenvector $\vv_i$.
+\end{theorem}
+
+\begin{remark}
+In the language of Chapter~\ref{ch:linear-mappings}: $P$ is the change-of-basis matrix from the
+eigenvector basis to the standard basis, and $D = P^{-1}AP$ is the matrix of the operator
+$\vv\mapsto A\vv$ written in the eigenvector basis. ``Diagonalisable'' therefore means ``similar to a
+diagonal matrix'', and the closing example of the previous chapter, with
+$M_S(F) = \left( \begin{smallmatrix} 3 & 0\\ 0 & 1 \end{smallmatrix} \right)$, was secretly a
+diagonalisation.
+\end{remark}
+
+\begin{corollary}
+If an $n\times n$ matrix has $n$ distinct eigenvalues in $\K$, then it is diagonalisable (eigenvectors for
+distinct eigenvalues are linearly independent, and $n$ linearly independent vectors form a basis of $\K^n$).
+\end{corollary}
+
+\begin{example}[Powers of a matrix]
+Diagonalisation makes it easy to compute powers of a matrix: if $A = P D P^{-1}$, then the inner factors
+cancel in pairs,
+\[
+A^k = (PDP^{-1})(PDP^{-1})\cdots (PDP^{-1}) = P\, D^k\, P^{-1},
+\]
+and the power $D^k$ of a diagonal matrix is computed entrywise on the diagonal. For
+$A = \left( \begin{smallmatrix} 2 & 1\\ 1 & 2 \end{smallmatrix} \right)$ we found the eigenvalues $1$ and
+$3$ with eigenvectors $(1,-1)^T$ and $(1,1)^T$, so
+\[
+P = \left( \begin{array}{cc} 1 & 1\\ -1 & 1 \end{array} \right), \qquad
+D = \left( \begin{array}{cc} 1 & 0\\ 0 & 3 \end{array} \right), \qquad
+P^{-1} = \frac12\left( \begin{array}{cc} 1 & -1\\ 1 & 1 \end{array} \right),
+\]
+and therefore, for every $k\in\N$,
+\[
+A^k = P \left( \begin{array}{cc} 1 & 0\\ 0 & 3^k \end{array} \right) P^{-1}
+= \frac12 \left( \begin{array}{cc} 3^k+1 & 3^k-1\\ 3^k-1 & 3^k+1 \end{array} \right).
+\]
+For $k=1$ this indeed recovers $A$.
+\end{example}
+
+\begin{warning}
+Not every matrix is diagonalisable, even over $\C$: for
+$A = \left( \begin{smallmatrix} 1 & 1\\ 0 & 1 \end{smallmatrix} \right)$ the only eigenvalue is
+$\lambda = 1$, and its eigenspace $W_1 = \Span{\{(1,0)^T\}}$ is one-dimensional — there is no basis of
+$\C^2$ consisting of eigenvectors of $A$.
+\end{warning}
+
+\section{Application: PageRank}
+
+Eigenvectors for the eigenvalue $\lambda=1$ underlie Google's original PageRank algorithm for ranking web
+pages.
+
+A \emph{web graph} models the web: web pages are nodes and links are directed edges (arrows). For example:
+\[
+\begin{tikzcd}[row sep=large, column sep=large]
+1 \arrow[r] & 2 \\
+3 \arrow[u]\arrow[ur] & 4 \arrow[ul]\arrow[l]\arrow[u]
+\end{tikzcd}
+\]
+
+\begin{definition}
+In a web graph $G$, for a vertex $v$ let $l_v$ denote the number of outgoing edges starting at $v$.
+\end{definition}
+
+\noindent In the example above $l_1=1,\ l_2=0,\ l_3=2,\ l_4=3$.
+
+\begin{definition}
+For a web graph $G$ define its \emph{stochastic matrix} $S$ whose $ij$-entry is
+\[
+s_{ij} = \frac{1}{l_i} \quad\text{whenever there is a link from $i$ to $j$,} \qquad s_{ij}=0 \text{ otherwise.}
+\]
+If $l_i=0$, we set $s_{ii}=1$.
+\end{definition}
+
+\noindent For the graph above,
+\[
+S=\left( \begin{array}{cccc}
+0 & 1 & 0 & 0\\
+0 & 1 & 0 & 0\\
+\tfrac{1}{2} & \tfrac{1}{2} & 0 & 0\\
+\tfrac{1}{3} & \tfrac{1}{3} & \tfrac{1}{3} & 0
+\end{array} \right).
+\]
+
+\begin{fact}
+For the stochastic matrix $S$ of a web graph $G$:
+\begin{itemize}
+\item $0\leq s_{ij} \leq 1$ for all $i,j$;
+\item $S\cdot (1,\ldots,1)^T = (1,\ldots,1)^T$;
+\item $\lambda = 1$ is an eigenvalue of $S$ (and of $S^T$).
+\end{itemize}
+\end{fact}
+
+Let $w$ be the vector whose $i$-th entry is the probability that a surfer visits web page $i$. Then $w$
+satisfies
+\[
+S^T w = w, \qquad w \text{ has non-negative entries}, \qquad \text{the entries of } w \text{ sum to } 1.
+\]
+
+\begin{remark}
+In general $S^T$ may have many eigenvectors for $\lambda=1$ satisfying these properties, so the ranking is not
+yet well defined. This is fixed by the Google matrix below.
+\end{remark}
+
+\begin{definition}[Google matrix]
+Let $\alpha$ be the \emph{damping factor} (e.g.\ $\alpha=0.85$) and let $v$ be a \emph{personalization
+vector} with non-negative entries summing to $1$. Put
+\[
+G = \alpha \cdot S + (1-\alpha) \cdot (1,\ldots,1)^T \cdot v^T.
+\]
+The term $(1-\alpha)\,(1,\ldots,1)^T v^T$ models teleportation (random jumps).
+\end{definition}
+
+\begin{fact}
+The matrix $G^T$ has a \emph{unique} eigenvector $\pi$ for $\lambda =1$ (that is, $G^T\pi=\pi$) whose entries
+are non-negative and sum to $1$. The $i$-th entry of $\pi$ is the \emph{PageRank} of web page $i$.
+\end{fact}

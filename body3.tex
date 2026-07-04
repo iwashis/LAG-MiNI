@@ -1,0 +1,379 @@
+\section{Motivation}
+
+Solving systems of linear equations is the oldest problem of linear algebra — Chinese mathematicians were
+row reducing two thousand years ago — and, measured in CPU-hours, it may well be the computation the world
+performs most. When engineers simulate a bridge, a chip or tomorrow's weather, the physics is chopped into
+millions of small interacting pieces, and the interactions are linear equations; the supercomputer's job
+is to solve the resulting system. Concrete examples surround you:
+
+\begin{itemize}
+\item \textbf{GPS.} Your position is computed from your distances to several satellites; after a standard
+algebraic trick the unknown coordinates satisfy a small linear system, which your phone solves several
+times per second.
+\item \textbf{Computer graphics and game physics.} Finding where a ray of light meets a surface, or
+resolving the forces when a stack of crates topples, means setting up and solving linear systems — many
+thousands of them per frame.
+\item \textbf{Electronics.} Kirchhoff's laws turn any circuit diagram into a linear system relating its
+currents and voltages; circuit simulators such as SPICE are, at their core, linear-system solvers.
+\item \textbf{Medical imaging.} A CT scanner measures how much X-ray energy survives along thousands of
+lines through the body; reconstructing the image of the inside is solving a huge linear system for the
+unknown tissue densities.
+\item \textbf{Machine learning.} Fitting a linear model to data by least squares — the workhorse of
+statistics — leads to the so-called normal equations: a linear system in the model's parameters.
+\end{itemize}
+
+This chapter presents \emph{Gaussian elimination}, the algorithm behind all of the above. It deserves the
+same respect as any classic algorithm you know: it is provably correct (elementary row operations preserve
+the solution set), it is fast (about $\tfrac23 n^3$ arithmetic operations for $n$ equations with $n$
+unknowns), and it is universal. Just as valuable is the \emph{structure theory} that comes with it: a
+linear system has either no solution, exactly one, or infinitely many — never, say, exactly two — and the
+Kronecker--Capelli theorem decides which case occurs by comparing two ranks. In the infinite case the
+solutions are beautifully organised: one particular solution plus a \emph{subspace} of $\K^n$ — the first
+place in the course where the abstract theory of Chapter~\ref{ch:vector-spaces} pays off directly.
+
+\section{Systems of linear equations}
+
+\begin{definition}
+A \emph{system of $m$ linear equations with $n$ unknowns} $x_1,\ldots,x_n$ is a set of equations
+\[
+\begin{aligned}
+a_{11} x_1 + a_{12} x_2 +\ldots+ a_{1n} x_n &= b_1,\\
+a_{21} x_1 + a_{22} x_2 +\ldots+ a_{2n} x_n &= b_2,\\
+&\ \vdots \\
+a_{m1} x_1 + a_{m2} x_2 +\ldots+ a_{mn} x_n &= b_m,
+\end{aligned}
+\]
+with $a_{ij}, b_i\in\K$. A \emph{solution} of this system is a tuple of values $x_1 = k_1,\ldots, x_n=k_n$
+which satisfies all $m$ equalities.
+\end{definition}
+
+\begin{example}
+The system
+\[
+\begin{aligned}
+3x + y + z &= 1,\\
+x + y &= 0
+\end{aligned}
+\]
+has $2$ equations and $3$ unknowns. One checks that $x=0,y=0,z=1$ and $x=-1,y=1,z=3$ are both solutions
+(there are others). On the other hand the system
+\[
+\begin{aligned}
+x + y &= 1,\\
+x + y &= 0
+\end{aligned}
+\]
+has no solutions, since a solution would imply $0=1$.
+\end{example}
+
+\begin{observation}[Matrix representation]
+A system of $m$ linear equations with unknowns $x_1,\ldots,x_n$ can be written as a single matrix equation
+\[
+A\cdot X = B,
+\]
+where
+\[
+A = \left( \begin{array}{cccc}
+a_{11} & a_{12} & \ldots & a_{1n} \\
+a_{21} & a_{22} & \ldots & a_{2n} \\
+\vdots & \vdots & \ddots & \vdots \\
+a_{m1} & a_{m2} & \ldots & a_{mn}
+\end{array} \right), \qquad
+X = \left ( \begin{array}{c} x_1 \\ x_2 \\ \vdots \\ x_n \end{array} \right ), \qquad
+B = \left ( \begin{array}{c} b_1 \\ b_2 \\ \vdots \\ b_m \end{array} \right ).
+\]
+\end{observation}
+
+\begin{definition}
+Two systems $A_1 X = B_1$ and $A_2 X = B_2$ of $m$ linear equations with $n$ unknowns are \emph{equivalent}
+if they have the same solution set.
+\end{definition}
+
+\begin{example}
+The system $\{\,x - y = 1,\ x + y = 0\,\}$ is equivalent to $\{\,2x - 2y = 2,\ x + y = 0\,\}$.
+\end{example}
+
+\begin{definition}
+The matrix
+\[
+(A\mid B) = \left( \begin{array}{cccc|c}
+a_{11} & a_{12} & \ldots & a_{1n} & b_1 \\
+a_{21} & a_{22} & \ldots & a_{2n} & b_2\\
+\vdots & \vdots & \ddots & \vdots & \vdots \\
+a_{m1} & a_{m2} & \ldots & a_{mn} & b_m
+\end{array} \right)
+\]
+is called the \emph{augmented matrix} of the system $A\cdot X = B$.
+\end{definition}
+
+\begin{example}
+The matrix
+$\left( \begin{array}{cc|c} 2 & -2 & 2\\ 1 & 1 & 0 \end{array} \right)$
+is the augmented matrix of the system $\{\,2x - 2y = 2,\ x + y = 0\,\}$.
+\end{example}
+
+\begin{theorem}
+Two systems $A_1 X = B_1$ and $A_2 X= B_2$ of $m$ linear equations with $n$ unknowns are equivalent if and
+only if their augmented matrices $(A_1\mid B_1)$ and $(A_2\mid B_2)$ are row equivalent.
+\end{theorem}
+
+\noindent Recall that two matrices are row equivalent if one can be obtained from the other by elementary row
+operations: row switching ($R_i\leftrightarrow R_j$), row scaling by a nonzero scalar
+($kR_i\rightarrow R_i$) and row addition ($R_i+k\cdot R_j\rightarrow R_i$).
+
+\section{Solving systems}
+
+\begin{definition}
+A system $AX=B$ of linear equations is in \emph{echelon form} if its augmented matrix $(A\mid B)$ is in row
+echelon form.
+\end{definition}
+
+Since every matrix is row equivalent to a matrix in row echelon form, for any system $AX=B$ there exists an
+equivalent system $A'X=B'$ in echelon form, that is, a system in echelon form with the same solution set.
+This gives a general method.
+
+\begin{theorem}[Solving a system]
+To solve a system $AX=B$:
+\begin{itemize}
+\item write its augmented matrix $(A\mid B)$;
+\item find a matrix $(A'\mid B')$ in row echelon form which is row equivalent to $(A\mid B)$;
+\item write the new system $A' X = B'$ and read off its solutions.
+\end{itemize}
+\end{theorem}
+
+\begin{remark}
+This procedure is known as \emph{Gaussian elimination}. Reading the solutions off an echelon system, from
+the last equation upwards, is called \emph{back substitution}.
+\end{remark}
+
+\begin{example}[A unique solution]
+Consider the system
+\[
+\begin{aligned}
+2x +4y-z &= 11,\\ -4x -3y+3z &= 20,\\ 2x +4y+2z &= 2,
+\end{aligned}
+\qquad\text{with augmented matrix}\qquad
+\left( \begin{array}{ccc|c}
+2 & 4 & -1 & 11\\ -4 & -3 & 3 & 20\\ 2 & 4 & 2 & 2
+\end{array} \right).
+\]
+Using elementary row operations we obtain the row echelon form
+\[
+\left( \begin{array}{ccc|c}
+2 & 4 & -1 & 11\\ 0 & 5 & 1 & 2\\ 0 & 0 & 3 & -9
+\end{array} \right),
+\qquad\text{i.e.}\qquad
+\begin{aligned}
+2x +4y-z &= 11,\\ 5y+z &= 2,\\ 3z &= -9.
+\end{aligned}
+\]
+The third equation gives $z=-3$; the second then gives $5y-3=2$, so $y=1$; finally $x=2$. The system has the
+unique solution $x=2,\ y=1,\ z=-3$.
+\end{example}
+
+\begin{example}[Infinitely many solutions]
+Consider the system
+\[
+\begin{aligned}
+x + 4y - 3z +2t &= 5,\\ 2x + 8y -5z\phantom{{}+2t} &=12,
+\end{aligned}
+\qquad\text{with augmented matrix}\qquad
+\left( \begin{array}{cccc|c}
+1 & 4 & -3 & 2 & 5\\ 2 & 8 & -5 & 0 & 12
+\end{array} \right).
+\]
+By row reduction we obtain
+\[
+\left( \begin{array}{cccc|c}
+1 & 4 & -3 & 2 & 5\\ 0 & 0 & 1 & -4 & 2
+\end{array} \right),
+\qquad\text{i.e.}\qquad
+\begin{aligned}
+x + 4y - 3z +2t &= 5,\\ z-4t &= 2.
+\end{aligned}
+\]
+This echelon system has $2$ equations and $4$ unknowns, hence more than one solution. We assign arbitrary
+values to the non-leading variables $y=a$ and $t=b$. Substitution gives $z=2+4b$ and $x=11-4a+10b$. The
+solution depends on two parameters:
+\[
+x=11-4a+10b, \quad y = a, \quad z = 2+4b, \quad t=b.
+\]
+\end{example}
+
+\begin{example}[No solution]
+Consider the system
+\[
+\begin{aligned}
+2x +4y &= 0,\\ 2x + 4y &= 1,
+\end{aligned}
+\qquad\text{with augmented matrix}\qquad
+\left( \begin{array}{cc|c} 2 & 4 & 0\\ 2 & 4 & 1 \end{array} \right)
+\xrightarrow{\ \ }
+\left( \begin{array}{cc|c} 2 & 4 & 0\\ 0 & 0 & 1 \end{array} \right).
+\]
+The last row reads $0=1$, so this system has no solutions.
+\end{example}
+
+\begin{theorem}[Kronecker--Capelli]
+A system $AX=B$ of linear equations has a solution if and only if $\rank(A) = \rank(A\mid B)$.
+\end{theorem}
+
+\begin{example}
+For the system from the previous example,
+\[
+(A\mid B) = \left( \begin{array}{cc|c} 2 & 4 & 0\\ 2 & 4 & 1 \end{array} \right)
+\longrightarrow
+\left( \begin{array}{cc|c} 2 & 4 & 0\\ 0 & 0 & 1 \end{array} \right),
+\]
+we read off $\rank(A) = 1$ and $\rank(A\mid B) = 2$. The two ranks differ, which confirms that the system
+has no solutions.
+\end{example}
+
+\begin{example}[A system with a parameter]
+For which values of the parameter $p\in\R$ does the system
+\[
+\begin{aligned}
+x+y+z &= 1,\\ x+2y+3z &= 2,\\ 2x+3y+4z &= p
+\end{aligned}
+\]
+have solutions? Row reducing the augmented matrix,
+\[
+\left( \begin{array}{ccc|c}
+1 & 1 & 1 & 1\\ 1 & 2 & 3 & 2\\ 2 & 3 & 4 & p
+\end{array} \right)
+\xrightarrow{\substack{R_2-R_1\to R_2\\ R_3-2R_1\to R_3}}
+\left( \begin{array}{ccc|c}
+1 & 1 & 1 & 1\\ 0 & 1 & 2 & 1\\ 0 & 1 & 2 & p-2
+\end{array} \right)
+\xrightarrow{R_3-R_2\to R_3}
+\left( \begin{array}{ccc|c}
+1 & 1 & 1 & 1\\ 0 & 1 & 2 & 1\\ 0 & 0 & 0 & p-3
+\end{array} \right).
+\]
+If $p\neq 3$, the last row reads $0 = p-3\neq 0$ and there are no solutions (equivalently,
+$\rank(A) = 2 < 3 = \rank(A\mid B)$). If $p = 3$, then $\rank(A) = \rank(A\mid B) = 2$ and the system has
+infinitely many solutions: taking $z = a$ we get $y = 1-2a$ and $x = a$.
+\end{example}
+
+\section{Homogeneous systems}
+
+\begin{definition}
+A system of linear equations is called \emph{homogeneous} if it has the form $A\cdot X = \0$.
+\end{definition}
+
+\noindent A homogeneous system \emph{always} has the solution $x_1=0, x_2=0,\ldots,x_n=0$. Any other solution
+(if one exists) is called a \emph{non-trivial} solution.
+
+\begin{example}
+The homogeneous system
+\[
+\begin{aligned}
+x+2y-3z+w &= 0,\\ x-3y +z -2w &=0,\\ 2x+y-3z+5w &= 0
+\end{aligned}
+\]
+has $3$ equations and $4$ unknowns; therefore it has non-trivial solutions.
+\end{example}
+
+\begin{example}
+The homogeneous system
+\[
+\begin{aligned}
+x+y-z &= 0,\\ 2x-3y+z &=0,\\ x-4y+2z &= 0
+\end{aligned}
+\qquad\text{reduces to}\qquad
+\begin{aligned}
+x+y-z &= 0,\\ -5y+3z &= 0.
+\end{aligned}
+\]
+It has a non-trivial solution: assigning $z=a$ gives $y=\tfrac{3}{5}a$ and $x=\tfrac{2}{5}a$.
+\end{example}
+
+\begin{example}
+The homogeneous system
+\[
+\begin{aligned}
+x+y-z &= 0,\\ 2x+4y-z &=0,\\ 3x+2y+2z &= 0
+\end{aligned}
+\qquad\text{reduces to}\qquad
+\begin{aligned}
+x+y-z &= 0,\\ 2y+z &= 0,\\ 11z &= 0.
+\end{aligned}
+\]
+Here the only solution is the trivial one $x=y=z=0$.
+\end{example}
+
+\begin{theorem}[Solution space]
+Let $AX=\0$ be a system of $m$ homogeneous linear equations with $n$ unknowns. Then the set
+$W=\{\vv\in \K^n\mid A\vv=\0\}$ of solutions is a subspace of the vector space $\K^n$. Moreover,
+\[
+\dim(W) = n-\rank(A).
+\]
+\end{theorem}
+
+\begin{proof}
+We prove that $W$ is a subspace. Take $\vv_1,\vv_2\in W$, so $A\vv_1=\0$ and $A\vv_2=\0$. Then
+\[
+A(\vv_1+\vv_2) = A\vv_1+A\vv_2 = \0+\0=\0,
+\]
+hence $\vv_1+\vv_2\in W$. Similarly, for any $k\in \K$ we have $A(k\vv_1)=kA\vv_1=\0$, so $k\cdot \vv_1\in W$.
+\end{proof}
+
+\begin{example}
+Consider the homogeneous system
+\[
+\begin{aligned}
+x+2y+3z &= 0,\\ -2x-4y-6z &= 0,
+\end{aligned}
+\qquad\text{which reduces to}\qquad
+x+2y+3z = 0.
+\]
+The non-leading variables are $y$ and $z$. Putting $y=a$ and $z=b$, the solutions are
+\[
+\left( \begin{array}{c} x \\ y \\ z \end{array} \right )= \left( \begin{array}{c} -2a-3b \\ a \\ b \end{array} \right ),
+\]
+so the solution space is
+\[
+W = \Big\{ \left( \begin{array}{c} -2a-3b \\ a \\ b \end{array} \right ) \;\Big|\; a,b\in\R\Big\}.
+\]
+Taking $(a,b)=(1,0)$ and $(a,b)=(0,1)$ yields two vectors
+\[
+\left( \begin{array}{c} -2 \\ 1 \\ 0 \end{array} \right ),\qquad
+\left( \begin{array}{c} -3 \\ 0 \\ 1 \end{array} \right )
+\]
+which form a basis of $W$.
+\end{example}
+
+\section{Homogeneous and non-homogeneous systems}
+
+\begin{theorem}
+Let $AX=B$ be an arbitrary system of linear equations, let $U$ be its solution set and let $\vv_0\in U$ be a
+particular solution. Then
+\[
+U = \vv_0 + W =\{\vv_0 + \ww \mid \ww\in W\},
+\]
+where $W$ is the solution space of the associated homogeneous system $AX=\0$.
+\end{theorem}
+
+\begin{proof}
+Every element of $\vv_0 + W$ is a solution of $AX=B$, since
+\[
+A(\vv_0 + \ww) = A\vv_0 + A\ww=B+\0=B.
+\]
+Conversely, if $A\vv=B$, put $\ww=\vv-\vv_0$. Then $\vv = \vv_0+\ww$ and
+\[
+A\ww = A(\vv-\vv_0) = A\vv-A\vv_0 = B-B = \0,
+\]
+so $\ww\in W$ and $\vv\in \vv_0+W$.
+\end{proof}
+
+\begin{example}
+Consider the equation $x+2y+3z = 6$ (a system of one equation with three unknowns). A particular solution
+is $\vv_0 = (1,1,1)$, and the associated homogeneous equation $x+2y+3z = 0$ has the solution space
+\[
+W = \Span{\{(-2,1,0),\ (-3,0,1)\}},
+\]
+as computed in an earlier example. Hence every solution of $x+2y+3z=6$ has the form
+\[
+(1,1,1) + a\,(-2,1,0)+b\,(-3,0,1), \qquad a,b\in\R.
+\]
+\end{example}
