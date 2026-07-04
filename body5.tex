@@ -1,0 +1,345 @@
+\section{Motivation}
+
+Having studied vector spaces — the objects of linear algebra — we now study the \emph{functions} between
+them. Not all functions, though: only the \emph{linear} ones, those that respect addition and scaling.
+This restriction looks severe, and that is exactly its charm. A linear mapping $\R^n\to\R^m$ is completely
+determined by its values on the $n$ basis vectors, so it can be stored as a matrix and evaluated by matrix
+multiplication. Compare: an arbitrary function on a million-dimensional space is unknowable, while a
+linear one is a finite table of numbers. Linearity is the price we pay to make functions computable — and
+an astonishing amount of computing fits within that budget:
+
+\begin{itemize}
+\item \textbf{3D graphics.} Every frame, a game engine pushes millions of vertices through the same
+pipeline: rotate the model, place it in the world, position the camera, project onto the screen. Each
+stage is a linear mapping, and the whole pipeline is their composition — which, by a central theorem of
+this chapter, is again a single matrix, precomputed once per frame and then applied cheaply to every
+vertex. This is why the graphics industry runs on matrix multiplication.
+\item \textbf{Neural networks.} Each layer of a neural network is a linear mapping followed by a fixed,
+very simple non-linear function. All of the network's learned knowledge is stored in the matrices of its
+linear parts.
+\item \textbf{Signals, robots, cameras.} Audio filters, the coordinate changes between a robot's joints
+and the room it stands in, and the projection performed by a camera are all linear mappings.
+\end{itemize}
+
+The second half of the chapter introduces the \emph{kernel} of a mapping (everything that is sent to zero)
+and its \emph{image} (everything it can produce). These measure the two ways a transformation loses
+information. The kernel is what becomes indistinguishable from nothing: projecting a 3D scene onto a 2D
+screen has the viewing direction in its kernel — which is precisely why a single photograph cannot tell
+you how far away things are. The image tells us which outputs are achievable at all. The chapter
+culminates in the \emph{rank--nullity theorem}, a conservation law for dimensions: what survives (the
+image) plus what is lost (the kernel) always adds up to what you started with. It is the theoretical heart
+of the question ``can this transformation be undone?'' — tying back to the invertible matrices of
+Chapter~\ref{ch:determinants} — and of data compression, where losing the right information is the whole
+point.
+
+\section{Linear mappings}
+
+\begin{definition}
+Let $\V$ and $\W$ be two vector spaces over a field $\K$. A mapping $F\colon \V\to \W$ is called a
+\emph{linear mapping} if it satisfies the following conditions:
+\begin{itemize}
+\item $F(\vv_1+\vv_2) = F(\vv_1)+F(\vv_2)$ for any $\vv_1,\vv_2\in \V$;
+\item $F(\lambda\cdot \vv) = \lambda \cdot F(\vv)$ for any $\vv\in \V$ and $\lambda\in \K$.
+\end{itemize}
+\end{definition}
+
+For $\V=\W=\R$, every linear mapping from $\R$ to $\R$ is of the form $y = a\cdot x$ for some $a\in \R$.
+Standard examples of linear mappings include rotation by a fixed angle and scaling (length multiplication).
+
+\begin{theorem}
+For any linear mapping $F\colon \V\to \W$ we have $F(\0) = \0$.
+\end{theorem}
+
+\begin{theorem}
+A mapping $F\colon \V\to \W$ is linear if and only if
+\[
+F(\lambda\cdot \vv_1 + \vv_2) = \lambda\cdot F(\vv_1) + F(\vv_2) \quad \text{for any } \vv_1,\vv_2\in \V \text{ and any } \lambda\in \K.
+\]
+\end{theorem}
+
+\begin{example}
+The mapping $f\colon\R^3\to \R^2$ given by $f(x,y,z) = (x+y,\,z-x)$ is linear. Indeed, for
+$\vv_1 = (x_1,y_1,z_1)$ and $\vv_2 = (x_2,y_2,z_2)$,
+\[
+f(\vv_1+\vv_2) = \big((x_1+x_2)+(y_1+y_2),\ (z_1+z_2)-(x_1+x_2)\big)
+= (x_1+y_1,\,z_1-x_1)+(x_2+y_2,\,z_2-x_2) = f(\vv_1)+f(\vv_2),
+\]
+and similarly $f(\lambda x,\lambda y,\lambda z) = (\lambda x+\lambda y,\ \lambda z-\lambda x)
+= \lambda\cdot f(x,y,z)$.
+\end{example}
+
+\begin{warning}
+The mapping $f\colon\R^3\to \R^2$ given by $f(x,y,z) = (x+y,\,2z+1)$ is \emph{not} linear: indeed
+$f(0,0,0)=(0,1)\neq (0,0)$. The mapping $g(x,y,z) = (x^2,\,y)$ is not linear either, even though
+$g(0,0,0)=(0,0)$: we have $g(2,0,0) = (4,0)$, whereas $2\cdot g(1,0,0) = (2,0)$.
+\end{warning}
+
+\section{Linear mappings and matrices}
+
+We focus on linear mappings $F\colon\K^n\to \K^m$; the general case is similar but symbolically more involved.
+We write all vectors as columns.
+
+\begin{theorem}
+Let $A$ be an $m\times n$ matrix over $\K$. The mapping $F\colon\K^n\to \K^m$ defined by
+\[
+F(\vv) = A\cdot \vv \qquad (\vv\in \K^n)
+\]
+is a linear mapping.
+\end{theorem}
+
+\begin{example}
+For $A=\left(\begin{smallmatrix} 1 & 2 & 0 \\ -1 & 1 & 1 \end{smallmatrix} \right)$ the mapping
+$F(\vv)=A\cdot \vv$ is, written out explicitly,
+\[
+F\!\left( \begin{array}{c} x \\ y \\ z \end{array} \right) =
+\left( \begin{array}{c} x+2y \\ -x+y+z \end{array} \right),
+\qquad\text{i.e.}\qquad F(x,y,z) = (x+2y,\, -x+y+z).
+\]
+\end{example}
+
+Conversely, every linear mapping $\K^n\to\K^m$ arises from a matrix in this way.
+
+\begin{theorem}
+Let $F\colon\K^n \to \K^m$ be a linear mapping and let $M(F)$ be the matrix whose columns are the images of
+the standard basis vectors:
+\[
+M(F) = \big(\, F(e_1)\ \ F(e_2)\ \ \ldots\ \ F(e_n) \,\big),
+\qquad e_1 = (1,0,\ldots,0)^T,\ \ldots,\ e_n = (0,\ldots,0,1)^T.
+\]
+Then $F(\vv) = M(F)\cdot \vv$ for every $\vv\in \K^n$.
+\end{theorem}
+
+\begin{example}
+Consider the linear mapping $F\colon\R^3\to \R^2$ given by $F(x,y,z) = (x+y,\,z-x)$. Then
+\[
+F(1,0,0)=(1,-1), \quad F(0,1,0)=(1,0), \quad F(0,0,1)=(0,1),
+\]
+so
+\[
+M(F) = \left( \begin{array}{ccc} 1 & 1 & 0 \\ -1 & 0 & 1 \end{array} \right).
+\]
+\end{example}
+
+The standard basis is not special here: a linear mapping may be prescribed freely on \emph{any} basis.
+
+\begin{theorem}
+Let $\V$ and $\W$ be vector spaces over $\K$, let $\{\vv_1,\ldots,\vv_n\}$ be a basis of $\V$ and let
+$\ww_1,\ldots,\ww_n\in \W$ be arbitrary vectors. Then there exists exactly one linear mapping
+$F\colon \V\to \W$ with $F(\vv_i) = \ww_i$ for $i=1,\ldots,n$, namely
+\[
+F(a_1\vv_1+\ldots+a_n\vv_n) = a_1\ww_1+\ldots+a_n\ww_n.
+\]
+\end{theorem}
+
+\begin{example}
+Find the formula for the linear mapping $F\colon\R^2\to\R^2$ such that $F(1,1) = (2,0)$ and
+$F(1,-1) = (0,4)$. Writing an arbitrary vector in the basis $\{(1,1),(1,-1)\}$,
+\[
+(x,y) = \tfrac{x+y}{2}\,(1,1) + \tfrac{x-y}{2}\,(1,-1),
+\]
+we get, by linearity,
+\[
+F(x,y) = \tfrac{x+y}{2}\,(2,0) + \tfrac{x-y}{2}\,(0,4) = (x+y,\ 2x-2y).
+\]
+A quick check: $F(1,1) = (2,0)$ and $F(1,-1) = (0,4)$, as required.
+\end{example}
+
+\section{Geometric interpretation}
+
+Given a vector $\vv\in \K^n$ and an $m\times n$ matrix $A$, the product $A\vv$ may be thought of as the image
+of $\vv$ under the mapping $A$.
+
+\begin{example}[Rotation]
+Fix $\alpha\in [0,2\pi)$ and consider the matrix
+\[
+R_\alpha = \left( \begin{array}{cc} \cos \alpha & -\sin \alpha \\ \sin \alpha & \cos \alpha \end{array} \right).
+\]
+For a vector $\vv = \left( \begin{smallmatrix} x \\ y \end{smallmatrix} \right)$ the image
+\[
+R_\alpha\vv = \left( \begin{array}{c} x\cos\alpha - y\sin\alpha \\ x\sin\alpha + y\cos\alpha \end{array} \right)
+\]
+is the vector $\vv$ rotated about the origin by the angle $\alpha$.
+\end{example}
+
+\begin{example}[Scaling]
+Consider the matrix $A = \left( \begin{smallmatrix} 3 & 0 \\ 0 & 2 \end{smallmatrix} \right)$. For a vector
+$\vv = \left( \begin{smallmatrix} x \\ y \end{smallmatrix} \right)$ the image is
+$A\vv = \left( \begin{smallmatrix} 3x \\ 2y \end{smallmatrix} \right)$, i.e.\ $\vv$ stretched by the factor
+$3$ in the $x$-direction and $2$ in the $y$-direction.
+\end{example}
+
+\begin{example}[Reflection and projection]
+The matrix $\left( \begin{smallmatrix} 1 & 0 \\ 0 & -1 \end{smallmatrix} \right)$ maps
+$\left( \begin{smallmatrix} x \\ y \end{smallmatrix} \right)$ to
+$\left( \begin{smallmatrix} x \\ -y \end{smallmatrix} \right)$: it is the \emph{reflection} across the
+$x$-axis. The matrix $\left( \begin{smallmatrix} 1 & 0 \\ 0 & 0 \end{smallmatrix} \right)$ maps
+$\left( \begin{smallmatrix} x \\ y \end{smallmatrix} \right)$ to
+$\left( \begin{smallmatrix} x \\ 0 \end{smallmatrix} \right)$: it is the \emph{orthogonal projection} onto
+the $x$-axis.
+\end{example}
+
+\section{Composition of linear mappings}
+
+\begin{theorem}
+Let $F\colon \K^n\to\K^m$ and $G\colon \K^m\to\K^k$ be linear mappings. Then the composition
+$G\circ F\colon \K^n\to\K^k$ is linear, and
+\[
+M(G\circ F) = M(G)\cdot M(F).
+\]
+\end{theorem}
+
+\begin{remark}
+Matrix multiplication is precisely composition of linear mappings — this is the real reason behind its
+seemingly complicated definition, and also an explanation of why it fails to be commutative: composing
+mappings in different orders usually produces different mappings.
+\end{remark}
+
+\begin{example}
+Composing the rotation by $\alpha$ with the rotation by $\beta$ gives the rotation by $\alpha+\beta$, so
+$R_\beta\cdot R_\alpha = R_{\alpha+\beta}$, that is,
+\[
+\left( \begin{array}{cc} \cos \beta & -\sin \beta \\ \sin \beta & \cos \beta \end{array} \right)
+\left( \begin{array}{cc} \cos \alpha & -\sin \alpha \\ \sin \alpha & \cos \alpha \end{array} \right)
+=
+\left( \begin{array}{cc} \cos(\alpha+\beta) & -\sin(\alpha+\beta) \\ \sin(\alpha+\beta) & \cos(\alpha+\beta) \end{array} \right).
+\]
+Comparing the entries of both sides recovers the trigonometric angle-addition formulas:
+\[
+\cos(\alpha + \beta) = \cos\alpha\cos\beta - \sin\alpha\sin\beta, \qquad
+\sin(\alpha + \beta) = \sin\alpha\cos\beta + \cos\alpha\sin\beta.
+\]
+\end{example}
+
+\section{Kernel and image}
+
+\begin{definition}
+Let $F\colon \V\to \W$ be a linear mapping. The \emph{kernel} and the \emph{image} of $F$ are the sets
+\[
+\ker(F) = \{\vv\in \V\mid F(\vv) = \0\}\subseteq \V, \qquad
+\operatorname{im}(F) = \{F(\vv)\mid \vv\in \V\}\subseteq \W.
+\]
+\end{definition}
+
+\begin{theorem}
+$\ker(F)$ is a subspace of $\V$ and $\operatorname{im}(F)$ is a subspace of $\W$.
+\end{theorem}
+
+\begin{proof}
+If $\vv_1,\vv_2\in\ker(F)$, then $F(\vv_1+\vv_2) = F(\vv_1)+F(\vv_2) = \0+\0 = \0$ and
+$F(\lambda \vv_1) = \lambda\cdot F(\vv_1) = \0$, so $\ker(F)$ is closed under addition and scalar
+multiplication; moreover $F(\0)=\0$ gives $\0\in\ker(F)$. For the image:
+$F(\vv_1)+F(\vv_2) = F(\vv_1+\vv_2)\in\operatorname{im}(F)$ and
+$\lambda\cdot F(\vv_1) = F(\lambda \vv_1)\in \operatorname{im}(F)$.
+\end{proof}
+
+\begin{remark}
+Let $F\colon \K^n\to\K^m$ be linear with matrix $A = M(F)$. Then the kernel of $F$ is the solution space of
+the homogeneous system $AX = \0$, and the image of $F$ is the span of the columns of $A$. In particular,
+$\dim \operatorname{im}(F) = \rank(A)$.
+\end{remark}
+
+\begin{definition}
+Let $F\colon\V\to\W$ be a linear mapping. The \emph{rank} of $F$ is $\rank(F) = \dim\operatorname{im}(F)$,
+and the \emph{nullity} of $F$ is $\dim\ker(F)$.
+\end{definition}
+
+\begin{theorem}[Rank--nullity theorem]
+Let $F\colon \V\to \W$ be a linear mapping with $\dim(\V)<\infty$. Then
+\[
+\dim \ker(F) + \dim \operatorname{im}(F) = \dim(\V).
+\]
+\end{theorem}
+
+\begin{example}
+Let $F\colon\R^3\to \R^2$, $F(x,y,z) = (x+y,\,z-x)$, with the matrix
+$M(F) = \left( \begin{smallmatrix} 1 & 1 & 0 \\ -1 & 0 & 1 \end{smallmatrix} \right)$ computed earlier.
+The kernel consists of the solutions of $x+y = 0$, $z-x = 0$, so
+\[
+\ker(F) = \{(t,-t,t)\mid t\in\R\} = \Span{\{(1,-1,1)\}}, \qquad \dim\ker(F) = 1.
+\]
+Since $\rank M(F) = 2$, the image is a $2$-dimensional subspace of $\R^2$, i.e.\
+$\operatorname{im}(F) = \R^2$ and $F$ is surjective. The rank--nullity theorem confirms the count:
+$1 + 2 = 3 = \dim(\R^3)$.
+\end{example}
+
+\begin{fact}
+A linear mapping $F\colon \V\to \W$ is injective (one-to-one) if and only if $\ker(F) = \{\0\}$.
+\end{fact}
+
+\begin{proof}
+If $F$ is injective, then $F(\vv) = \0 = F(\0)$ forces $\vv = \0$. Conversely, assume $\ker(F)=\{\0\}$ and
+$F(\vv_1) = F(\vv_2)$. Then $F(\vv_1-\vv_2) = \0$, so $\vv_1-\vv_2\in\ker(F) = \{\0\}$, that is
+$\vv_1 = \vv_2$.
+\end{proof}
+
+\section{Matrices in arbitrary bases}
+
+The matrix $M(F)$ was built from the standard basis of $\K^n$. Often another basis is better suited to the
+problem — finding a basis in which the matrix of a mapping becomes as simple as possible is the theme of
+Chapter~\ref{ch:eigen} — so we now allow arbitrary bases. Recall from Chapter~\ref{ch:vector-spaces} that
+every vector has unique coordinates in a fixed basis.
+
+\begin{definition}
+Let $F\colon \V\to \W$ be a linear mapping, let $S = (\vv_1,\ldots,\vv_n)$ be a basis of $\V$ and let
+$R = (\ww_1,\ldots,\ww_m)$ be a basis of $\W$. The \emph{matrix of $F$ with respect to the bases $S$ and
+$R$}, denoted $M_S^R(F)$, is the $m\times n$ matrix whose $j$-th column consists of the coordinates of
+$F(\vv_j)$ in the basis $R$. For an operator $F\colon\V\to\V$ considered with a single basis $S$ we write
+$M_S(F) = M_S^S(F)$.
+\end{definition}
+
+\begin{theorem}
+With the notation above: if $x\in\K^n$ is the column of coordinates of $\vv$ in the basis $S$, then
+$M_S^R(F)\cdot x$ is the column of coordinates of $F(\vv)$ in the basis $R$.
+\end{theorem}
+
+\begin{example}
+Let $F\colon\R^2\to\R^2$, $F(x,y) = (x+y,\ x-y)$, and let $S = \big((1,1),(1,0)\big)$.
+\begin{itemize}
+\item Taking $R$ to be the standard basis: $F(1,1) = (2,0)$ and $F(1,0) = (1,1)$, so
+$M_S^R(F) = \left( \begin{smallmatrix} 2 & 1\\ 0 & 1 \end{smallmatrix} \right)$.
+\item Taking the basis $S$ on both sides, we express the images in $S$:
+$F(1,1) = (2,0) = 0\cdot(1,1)+2\cdot (1,0)$ and $F(1,0) = (1,1) = 1\cdot (1,1) + 0\cdot (1,0)$, so
+$M_S(F) = \left( \begin{smallmatrix} 0 & 1\\ 2 & 0 \end{smallmatrix} \right)$.
+\end{itemize}
+\end{example}
+
+\begin{definition}
+Let $S = (\vv_1,\ldots,\vv_n)$ and $R$ be two bases of $\V$. The \emph{change-of-basis matrix} from $S$ to
+$R$ is the matrix $P$ whose $j$-th column consists of the coordinates of $\vv_j$ in the basis $R$ — in
+other words, $P = M_S^R(\operatorname{id})$, the matrix of the identity mapping.
+\end{definition}
+
+\begin{theorem}[Change of basis]
+Let $F\colon\V\to\V$ be a linear operator, let $S$ and $R$ be bases of $\V$, and let $P$ be the
+change-of-basis matrix from $S$ to $R$. Then $P$ is invertible and
+\[
+M_S(F) = P^{-1}\cdot M_R(F)\cdot P.
+\]
+\end{theorem}
+
+\begin{definition}
+Square matrices $A$ and $B$ are called \emph{similar} if $A = P^{-1}\cdot B\cdot P$ for some invertible
+matrix $P$. By the theorem above, similar matrices are exactly the matrices of one and the same linear
+operator written in different bases.
+\end{definition}
+
+\begin{example}
+Let $F\colon\R^2\to\R^2$ have the matrix
+$A = \left( \begin{smallmatrix} 2 & 1\\ 1 & 2 \end{smallmatrix} \right)$ in the standard basis $R$, and
+take $S = \big((1,1),(1,-1)\big)$. The change-of-basis matrix and its inverse are
+\[
+P = \left( \begin{array}{cc} 1 & 1\\ 1 & -1 \end{array} \right), \qquad
+P^{-1} = \frac12 \left( \begin{array}{cc} 1 & 1\\ 1 & -1 \end{array} \right),
+\]
+and we compute
+\[
+M_S(F) = P^{-1}\, A\, P
+= \frac12 \left( \begin{array}{cc} 1 & 1\\ 1 & -1 \end{array} \right)
+\left( \begin{array}{cc} 2 & 1\\ 1 & 2 \end{array} \right)
+\left( \begin{array}{cc} 1 & 1\\ 1 & -1 \end{array} \right)
+= \left( \begin{array}{cc} 3 & 0\\ 0 & 1 \end{array} \right).
+\]
+In the basis $S$ the mapping is simply ``stretch the first coordinate by $3$, keep the second'': the
+matrix became \emph{diagonal}. Finding such bases systematically is precisely the subject of the next
+chapter.
+\end{example}

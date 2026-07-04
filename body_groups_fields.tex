@@ -1,0 +1,215 @@
+\section{Motivation}
+
+Computer science students meet abstraction every day: an \emph{interface} specifies which operations a
+data type must support and which laws they must obey, and any code written against the interface
+automatically works for every implementation. This chapter does exactly that to arithmetic. The arithmetic
+of the complex numbers we have just met — and of $\Q$ and $\R$ before them — obeys the same short list of
+rules: operations that are associative, have a neutral element, and admit inverses. Abstracting this list
+leads to two of the most basic algebraic ``interfaces'': \emph{groups} and \emph{fields}. Every theorem we
+prove from the axioms alone is proved once, for all implementations simultaneously: for real numbers, for
+complex numbers, for residues modulo a prime, for invertible matrices.
+
+This is not abstraction for its own sake — the ``exotic'' implementations are precisely the ones running
+your digital life:
+
+\begin{itemize}
+\item \textbf{Cryptography.} Whenever your browser shows a padlock, a key exchange has just been performed
+in a large finite group (Diffie--Hellman in $\Z_p\setminus\{0\}$, or on an elliptic curve). RSA encryption
+is arithmetic modulo $n$, and its security rests on how hard certain computations in these groups are. The
+finite fields $\Z_p$ defined in this chapter are the entry ticket to all of modern cryptography.
+\item \textbf{Error-correcting codes.} QR codes, scratched CDs, hard-disk RAID arrays and photographs sent
+back by space probes all survive damage thanks to Reed--Solomon codes — linear algebra over a finite field
+with $256$ elements. The AES cipher that encrypts your Wi-Fi traffic computes in the same field.
+\item \textbf{Bits form a field.} The smallest field, $\Z_2=\{0,1\}$, is the arithmetic of a single bit:
+its addition is the XOR gate and its multiplication is the AND gate. Linear algebra over $\Z_2$ is a
+standard tool in hashing, checksums and cryptanalysis.
+\end{itemize}
+
+For this course, though, the most important reason is different: fields are exactly the sets of
+\emph{scalars} over which vector spaces — the central objects of linear algebra — will be built in the
+following chapters. Whenever a definition below feels dry, remember: we are writing the interface, and the
+rest of this book is the code that runs against it.
+
+\section{Groups}
+
+\begin{definition}
+A \emph{group} is a set $G$ together with a binary operation $*\colon G\times G\to G$ satisfying:
+\begin{itemize}
+\item \textbf{(Associativity)} $(a*b)*c = a*(b*c)$ for all $a,b,c\in G$;
+\item \textbf{(Identity)} there is an element $e\in G$ such that $a*e=e*a=a$ for all $a\in G$;
+\item \textbf{(Inverses)} for every $a\in G$ there is an element $a^{-1}\in G$ such that
+$a*a^{-1}=a^{-1}*a=e$.
+\end{itemize}
+A group is called \emph{abelian} (or \emph{commutative}) if, in addition, $a*b=b*a$ for all $a,b\in G$.
+\end{definition}
+
+\begin{remark}
+When the operation is written additively (denoted $+$) the identity is written $0$ and the inverse of $a$ is
+written $-a$. When it is written multiplicatively (denoted $\cdot$) the identity is written $1$ and the
+inverse of $a$ is written $a^{-1}$ or $\tfrac{1}{a}$.
+\end{remark}
+
+Before listing examples we introduce one construction that will recur throughout the course:
+\emph{modular arithmetic}.
+
+\begin{definition}[Modular arithmetic]
+Fix a positive integer $n$. For an integer $a$ we write $a \bmod n$ for the remainder of the division of
+$a$ by $n$: the unique number $r\in\{0,1,\ldots,n-1\}$ such that $a = qn + r$ for some $q\in\Z$. Two
+integers $a$ and $b$ are \emph{congruent modulo $n$} if they leave the same remainder, i.e.\ if $n$
+divides $a-b$. On the set $\Z_n = \{0,1,\ldots,n-1\}$ we define \emph{addition and multiplication modulo
+$n$}:
+\[
+a +_n b = (a+b) \bmod n, \qquad a \cdot_n b = (a\cdot b) \bmod n.
+\]
+\end{definition}
+
+\begin{example}
+$17 \bmod 4 = 1$ (since $17 = 4\cdot 4+1$), $\ 4 \bmod 17 = 4$, and $(-2)\bmod 5 = 3$ (since
+$-2 = (-1)\cdot 5 + 3$; the remainder is always taken in $\{0,\ldots,n-1\}$). In $\Z_6$ we have
+$4 +_6 5 = 3$ and $4 \cdot_6 5 = 2$.
+\end{example}
+
+\begin{example}
+\hfill
+\begin{itemize}
+\item $(\Z,+)$, $(\Q,+)$, $(\R,+)$ and $(\C,+)$ are abelian groups; the identity is $0$ and the inverse of
+$a$ is $-a$.
+\item $(\Q\setminus\{0\},\cdot)$, $(\R\setminus\{0\},\cdot)$ and $(\C\setminus\{0\},\cdot)$ are abelian
+groups; the identity is $1$ and the inverse of $a$ is $\tfrac{1}{a}$.
+\item $(\Z,\cdot)$ is \emph{not} a group: apart from $\pm 1$, no integer has a multiplicative inverse in
+$\Z$.
+\item For a fixed $n$, the set $\Z_n=\{0,1,\ldots,n-1\}$ with addition modulo $n$ is an abelian group.
+\end{itemize}
+\end{example}
+
+\begin{example}[A finite multiplicative group]
+For a prime $p$, the non-zero residues $\Z_p\setminus\{0\}=\{1,2,\ldots,p-1\}$ form an abelian group under
+multiplication modulo $p$. For $p=5$, for example, $2\cdot 3 = 6 \equiv 1 \pmod 5$, so $3$ is the inverse of
+$2$. Inverses allow us to solve linear equations exactly as in $\Q$ or $\R$: in $\Z_7$ the equation
+$2\cdot_7 x = 1$ has the unique solution $x = 4$ (indeed $2\cdot 4 = 8 \equiv 1 \pmod 7$), and
+$2 \cdot_7 x = 5$ is solved by multiplying both sides by $4$: $x = 4\cdot_7 5 = 6$.
+\end{example}
+
+\begin{example}[A non-abelian group]
+The set of all invertible $2\times 2$ real matrices with matrix multiplication forms a group, called the
+\emph{general linear group} $GL_2(\R)$ (matrices and their multiplication are treated in detail in
+Chapter~\ref{ch:matrices}). It is \emph{not} abelian; for instance
+\[
+\begin{pmatrix} 1 & 1\\ 0 & 1\end{pmatrix}
+\begin{pmatrix} 1 & 0\\ 1 & 1\end{pmatrix}
+=\begin{pmatrix} 2 & 1\\ 1 & 1\end{pmatrix}
+\neq
+\begin{pmatrix} 1 & 1\\ 1 & 2\end{pmatrix}
+=\begin{pmatrix} 1 & 0\\ 1 & 1\end{pmatrix}
+\begin{pmatrix} 1 & 1\\ 0 & 1\end{pmatrix}.
+\]
+\end{example}
+
+\begin{example}[The power-set group]
+Let $X$ be a set and let $2^X$ denote the set of all its subsets. The \emph{symmetric difference}
+\[
+A \bigtriangleup B = (A\cup B)\setminus (A\cap B)
+\]
+(the set of elements belonging to exactly one of $A$ and $B$) makes $(2^X,\bigtriangleup)$ an abelian
+group: the identity element is $\emptyset$, and every element is its own inverse, since
+$A \bigtriangleup A = \emptyset$. Identifying a subset $A\subseteq \{1,\ldots,n\}$ with its characteristic
+bit vector, $\bigtriangleup$ becomes the bitwise XOR of bit strings.
+\end{example}
+
+\begin{fact}
+In any group $G$ the identity element is unique, and each element has a unique inverse.
+\end{fact}
+
+\begin{proof}
+If $e$ and $e'$ are both identities, then $e=e*e'=e'$. If $b$ and $b'$ are both inverses of $a$, then
+\[
+b = b*e = b*(a*b') = (b*a)*b' = e*b' = b'. \qedhere
+\]
+\end{proof}
+
+\begin{fact}[Cancellation laws]
+In any group $G$: if $a*b = a*c$, then $b=c$; similarly, if $b*a = c*a$, then $b=c$.
+\end{fact}
+
+\begin{proof}
+Multiplying $a*b=a*c$ by $a^{-1}$ on the left gives $a^{-1}*(a*b) = a^{-1}*(a*c)$; by associativity
+$(a^{-1}*a)*b = (a^{-1}*a)*c$, that is $e*b = e*c$, so $b=c$. The second law is proved symmetrically.
+\end{proof}
+
+\section{Fields}
+
+A field is a set carrying \emph{two} compatible operations, addition and multiplication, each of which behaves
+like an abelian group (with multiplication restricted to the non-zero elements), tied together by
+distributivity. The fields $\Q$ and $\R$ are the familiar prototypes.
+
+\begin{definition}
+A set $\K$ together with two binary operations $+$ and $\cdot$ is called a \emph{field} if it satisfies the
+following conditions.
+\begin{itemize}
+\item for any $a,b,c\in \K$, $\ a+b=b+a\ $ and $\ a+(b+c)=(a+b)+c$;
+\item there is an element $0\in \K$ such that $a+0=0+a=a$ for any $a\in \K$;
+\item for any $a\in \K$ there exists $-a\in \K$ such that $a+(-a)=(-a)+a=0$;
+\item for any $a,b,c\in \K$, $\ a\cdot b = b\cdot a\ $ and $\ a\cdot(b\cdot c)=(a\cdot b)\cdot c$;
+\item there is an element $1\in \K$ such that $a\cdot 1=1\cdot a=a$ for any $a\in \K$;
+\item for any $a\in \K$ with $a\neq 0$ there is $\tfrac{1}{a}\in \K$ such that
+$a \cdot \tfrac{1}{a} = \tfrac{1}{a}\cdot a = 1$;
+\item for any $a,b,c\in \K$, $\ (a+b)\cdot c = a\cdot c + b\cdot c$.
+\end{itemize}
+\end{definition}
+
+\begin{remark}
+Equivalently: $(\K,+)$ is an abelian group with identity $0$, the non-zero elements
+$(\K\setminus\{0\},\cdot)$ form an abelian group with identity $1$, and multiplication distributes over
+addition.
+\end{remark}
+
+\begin{example}
+$\Q$, $\R$ and $\C$, each with their usual addition and multiplication, are fields.
+\end{example}
+
+\begin{example}
+Consider the set $\Z_2=\{0,1\}$ with addition and multiplication given by
+\[
+\begin{array}{c|cc} + & 0 & 1 \\ \hline 0 & 0 & 1 \\ 1 & 1 & 0 \end{array}
+\qquad\qquad
+\begin{array}{c|cc} \cdot & 0 & 1 \\ \hline 0 & 0 & 0 \\ 1 & 0 & 1 \end{array}
+\]
+Then $\Z_2$ with these operations is a field (the smallest one).
+\end{example}
+
+\begin{example}
+More generally, consider $\Z_n$ with addition and multiplication modulo $n$.
+\begin{itemize}
+\item $\Z_4$ is \emph{not} a field: the products $2\cdot 0 = 0$, $2\cdot 1 = 2$, $2\cdot 2 = 0$ and
+$2\cdot 3 = 2$ (all modulo $4$) never equal $1$, so the element $2$ has no multiplicative inverse.
+\item $\Z_5$ \emph{is} a field: modulo $5$ we have $1\cdot 1 = 1$, $2\cdot 3 = 1$ and $4\cdot 4 = 1$, so
+every non-zero element has an inverse.
+\end{itemize}
+\end{example}
+
+\begin{theorem}
+$\Z_n$, with addition and multiplication modulo $n$, is a field if and only if $n$ is a prime number.
+\end{theorem}
+
+\begin{example}[A field between $\Q$ and $\R$]
+The set
+\[
+\Q(\sqrt 2) = \{a+b\sqrt 2\mid a,b\in \Q\}\subseteq \R
+\]
+with the usual addition and multiplication is a field. The only non-obvious axiom is the existence of
+multiplicative inverses, and it follows from the same trick we used for complex numbers: if
+$a+b\sqrt2\neq 0$, then
+\[
+\frac{1}{a+b\sqrt 2} = \frac{a-b\sqrt2}{(a+b\sqrt2)(a-b\sqrt2)}
+= \frac{a}{a^2-2b^2}-\frac{b}{a^2-2b^2}\,\sqrt 2,
+\]
+where $a^2-2b^2\neq 0$ because $\sqrt2$ is irrational.
+\end{example}
+
+\begin{warning}
+Not every set with an addition and a multiplication is a field. For example, $\Z$ with the standard operations
+is \emph{not} a field, because only $1$ and $-1$ have multiplicative inverses in $\Z$.
+\end{warning}
+
+\noindent In the chapters that follow, $\K$ always denotes a field; the reader may safely keep $\R$ or $\C$ in
+mind throughout.

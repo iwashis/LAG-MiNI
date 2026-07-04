@@ -1,0 +1,448 @@
+\section{Motivation}
+
+The equation
+\[
+x^2+1=0
+\]
+has no real solutions, since $x^2\geq 0$ for every $x\in\R$. Nonetheless, we often need solutions of such
+equations. The remedy is to \emph{extend} the set of real numbers: we introduce a new number
+\[
+i, \qquad \text{required to satisfy} \qquad i^2 = -1.
+\]
+Clearly $i$ is not a real number. As we shall see, adjoining $i$ to $\R$ produces a new field — the field of
+complex numbers — in which \emph{every} polynomial equation has a solution.
+
+So much for the algebra — but why should a computer scientist care about numbers that mathematicians
+themselves long dismissed as ``imaginary''? Because complex numbers turned out to be one of the most
+practical inventions in the history of mathematics. You have already used them today, probably several
+times:
+
+\begin{itemize}
+\item \textbf{Multimedia and signal processing.} Every JPEG image, every MP3 file and every video call
+relies on the \emph{Fast Fourier Transform} (FFT), an algorithm that decomposes a signal into a
+combination of simple waves. The FFT is formulated entirely in terms of complex numbers — more precisely,
+in terms of the \emph{roots of unity} that we compute at the end of this chapter. The reason your phone
+can stream music in real time is that multiplying complex numbers of modulus $1$ is a very cheap way of
+manipulating waves.
+\item \textbf{Computer graphics and games.} As we shall see, multiplying by a complex number of modulus
+$1$ \emph{rotates} the plane: rotating a 2D sprite is literally one complex multiplication. The same idea,
+one dimension up, leads to \emph{quaternions} — a four-dimensional cousin of $\C$ used by every serious
+game engine to rotate 3D objects smoothly and without the numerical artefacts of angle-based approaches.
+\item \textbf{Quantum computing.} The state of a qubit is a pair of complex numbers, and everything a
+quantum computer does is linear algebra over $\C$. The famous interference effects behind quantum speedups
+are exactly additions of complex numbers with different arguments — the geometry of this chapter.
+\item \textbf{Fractals.} The Mandelbrot set — perhaps the most famous computer-generated image in history —
+is produced by iterating the map $z\mapsto z^2+c$ over complex numbers and colouring each pixel by how fast
+the modulus $|z|$ escapes to infinity.
+\end{itemize}
+
+There is also an internal reason to start the course here. The complex numbers are the cleanest example of
+a \emph{field} — the abstract structure, introduced in the next chapter, that provides the scalars for
+everything that follows: vector spaces, matrices, determinants and eigenvalues. Moreover, some purely
+real-looking problems of linear algebra secretly live in $\C$: in Chapter~\ref{ch:eigen} we will meet
+perfectly ordinary real matrices whose eigenvalues simply do not exist over $\R$ and force us into the
+complex plane whether we like it or not. Learning to compute in $\C$ now is a small investment with a
+large payoff.
+
+\section{The complex numbers}
+
+\begin{definition}
+A \emph{complex number} is an expression $a+bi$, where $a,b\in \R$. The set of all complex numbers is denoted
+by $\C$.
+\end{definition}
+
+\begin{definition}
+Addition and multiplication of complex numbers are defined by
+\[
+\begin{aligned}
+(a+bi)+(c+di) &= (a+c) + (b+d)i,\\
+(a+bi)\cdot(c+di) &= (ac-bd)+ (ad+bc)i.
+\end{aligned}
+\]
+\end{definition}
+
+\noindent The rule for multiplication is exactly what one obtains by expanding $(a+bi)(c+di)$ formally and
+using $i^2=-1$.
+
+\begin{example}
+\[
+(2+3i)+(1-2i) = 3+i, \qquad
+(2+3i)\cdot(1-2i) = 2-4i+3i-6i^2 = 2-i+6 = 8-i.
+\]
+\end{example}
+
+\begin{fact}
+Addition and multiplication of complex numbers are both commutative and associative, and multiplication is
+distributive over addition.
+\end{fact}
+
+\begin{proof}
+A straightforward verification from the definitions.
+\end{proof}
+
+\begin{fact}[Inversion]
+For any complex number $a+bi$ we have $(a+bi)(a-bi)=a^2+b^2$. Consequently, if $z=a+bi\neq 0$, then its
+multiplicative inverse is
+\[
+\frac{1}{z}=\frac{1}{a+bi} = \frac{a}{a^2+b^2}-\frac{b}{a^2+b^2}\,i.
+\]
+\end{fact}
+
+\begin{proof}
+Multiplying numerator and denominator by the conjugate $a-bi$,
+\[
+\frac{1}{a+bi} =\frac{a-bi}{(a+bi)(a-bi)} = \frac{a-bi}{a^2+b^2}. \qedhere
+\]
+\end{proof}
+
+\begin{example}
+\[
+\frac{1}{i} = \frac{-i}{i\cdot(-i)} = \frac{-i}{1} = -i, \qquad
+\frac{1}{1+i} = \frac{1-i}{(1+i)(1-i)} = \frac{1-i}{2} =\tfrac12 + \tfrac12 i.
+\]
+\end{example}
+
+\begin{theorem}
+The set of complex numbers, with the addition and multiplication defined above, forms a field.
+\end{theorem}
+
+\noindent The general notion of a field is made precise in the next chapter; the theorem above says precisely
+that $\C$ satisfies all of its axioms.
+
+\section{Modulus, conjugate and the complex plane}
+
+\begin{definition}
+Let $z=a+bi$ be a complex number. We define
+\[
+\begin{aligned}
+&\Re(z)=a && \text{(the \emph{real part} of $z$)},\\
+&\Im(z)=b && \text{(the \emph{imaginary part} of $z$)},\\
+&|z|=\sqrt{a^2+b^2} && \text{(the \emph{modulus} of $z$)},\\
+&\bar{z}=a-bi && \text{(the \emph{conjugate} of $z$)}.
+\end{aligned}
+\]
+\end{definition}
+
+\begin{example}
+For $z = 3-4i$ we have $\Re(z) = 3$, $\Im(z) = -4$ (note that the imaginary part is a \emph{real} number),
+$|z| = \sqrt{9+16} = 5$ and $\bar z = 3+4i$. Moreover
+$z\cdot\bar z = (3-4i)(3+4i) = 9+16 = 25 = |z|^2$.
+\end{example}
+
+\begin{fact}[Properties]
+For complex numbers $z,z_1$,
+\[
+z\cdot \bar{z} = |z|^2, \qquad |z| = \sqrt{z\cdot \bar{z}}, \qquad
+\Re(z) = \tfrac12 (z+\bar{z}), \qquad \Im(z) = \tfrac{1}{2i} (z-\bar{z}),
+\]
+and $|z-z_1|$ is the distance between the points $z$ and $z_1$.
+\end{fact}
+
+\begin{fact}[Algebra of conjugates and moduli]
+For all $z,w\in\C$:
+\[
+\overline{z+w} = \bar z + \bar w, \qquad \overline{z\cdot w} = \bar z \cdot \bar w, \qquad \bar{\bar z} = z,
+\qquad |z\cdot w| = |z|\,|w|, \qquad \left| \frac{z}{w} \right| = \frac{|z|}{|w|} \quad (w\neq 0).
+\]
+\end{fact}
+
+\begin{example}[Geometric loci]
+Since $|z-z_0|$ is the distance from $z$ to $z_0$, conditions on moduli describe geometric figures in the
+complex plane:
+\begin{itemize}
+\item $\{z\in\C \mid |z-z_0| = r\}$ is the circle of radius $r$ centred at $z_0$; for instance
+$|z+3-i| = 5$ describes the circle of radius $5$ centred at $z_0 = -3+i$ (note the signs:
+$|z+3-i| = |z-(-3+i)|$).
+\item $\{z\in\C \mid |z-z_0| \leq r\}$ is the closed disc of radius $r$ centred at $z_0$, and
+$\{z\in\C \mid |z-z_0| > r\}$ is the exterior of that disc.
+\item Conditions on $\Re$ and $\Im$ describe half-planes and lines: $\Re(z)>0$ is the open right
+half-plane, while $\Im(z) = 1$ is a horizontal line.
+\end{itemize}
+\end{example}
+
+Since a complex number $z=a+bi$ is a pair of real numbers, it can be drawn as a point (or vector) in the
+plane — the \emph{complex plane} (or \emph{Argand diagram}). Its modulus $|z|$ is the length of the vector,
+and its \emph{argument} $\varphi$ is the angle the vector makes with the positive real axis.
+
+\begin{center}
+\begin{tikzpicture}[scale=1.2,>=stealth]
+  \draw[->] (-0.4,0) -- (3.2,0) node[right] {$\Re$};
+  \draw[->] (0,-0.4) -- (0,2.6) node[above] {$\Im$};
+  \coordinate (Z) at (2.4,2.0);
+  \draw[->,thick,defaccent] (0,0) -- (Z) node[midway,above left] {$|z|$};
+  \filldraw (Z) circle (1.2pt) node[right] {$z=a+bi$};
+  \draw[dashed] (Z) -- (2.4,0) node[below] {$a$};
+  \draw[dashed] (Z) -- (0,2.0) node[left] {$b$};
+  \draw[exaccent] (0.8,0) arc (0:39.8:0.8);
+  \node[exaccent] at (1.05,0.27) {$\varphi$};
+\end{tikzpicture}
+\end{center}
+
+\section{Polar form and De Moivre's formula}
+
+\begin{definition}
+Instead of Cartesian coordinates, a complex number $z=a+bi$ may be described by \emph{polar coordinates}: its
+\emph{modulus} $|z|=\sqrt{a^2+b^2}$ and its \emph{argument} (or \emph{phase}) $\arg(z)$.
+\end{definition}
+
+\begin{theorem}[Polar form]
+Let $z=a+bi$ have modulus $|z|$ and argument $\varphi=\arg(z)$. Then
+\[
+a = |z|\cos\varphi, \qquad b = |z|\sin\varphi,
+\]
+and conversely $|z| = \sqrt{a^2+b^2}$, while $\varphi$ may be found from $\tan\varphi= \tfrac{b}{a}$. Hence
+\[
+z=|z|\left(\cos \varphi + i\sin \varphi \right).
+\]
+\end{theorem}
+
+\begin{warning}
+The equation $\tan\varphi= \tfrac{b}{a}$ alone does \emph{not} determine the argument: two angles in
+$(-\pi,\pi]$ satisfy it. One must always check in which quadrant the point $(a,b)$ lies. For instance,
+$z=-1+i$ lies in the second quadrant, so $\arg(z)=\tfrac{3\pi}{4}$, even though
+$\tan \tfrac{3\pi}{4} = -1 = \tan\!\left(-\tfrac{\pi}{4}\right)$.
+\end{warning}
+
+\begin{fact}
+If $\varphi$ is an argument of a complex number $z$, then so is $\varphi+2k\pi$ for any $k\in\Z$.
+\end{fact}
+
+\begin{definition}
+The argument $\varphi$ of a complex number $z$ for which $\varphi\in (-\pi,\pi]$ is called the
+\emph{principal argument}.
+\end{definition}
+
+\begin{example}
+Let $z=1+i$. Then $|z|=\sqrt{2}$ and, reading the angle off the complex plane, $\arg(z) = \tfrac{\pi}{4}=45^\circ$.
+In polar form,
+\[
+1+i = \sqrt{2}\left( \cos\tfrac{\pi}{4} + i \sin \tfrac{\pi}{4}\right).
+\]
+\end{example}
+
+\begin{theorem}[Multiplication in polar form]
+Let $z_1=|z_1|(\cos \varphi_1 + i\sin\varphi_1)$ and $z_2=|z_2|(\cos \varphi_2 + i\sin\varphi_2)$. Then
+\[
+z_1 z_2 = |z_1|\,|z_2|\,\big(\cos (\varphi_1+\varphi_2) + i\sin(\varphi_1+\varphi_2)\big), \qquad
+\frac{z_1}{z_2} = \frac{|z_1|}{|z_2|}\,\big(\cos (\varphi_1-\varphi_2) + i\sin(\varphi_1-\varphi_2)\big).
+\]
+That is, multiplication multiplies the moduli and adds the arguments.
+\end{theorem}
+
+\begin{theorem}[De Moivre's formula]
+Set $z^0 = 1$ and $z^n = z^{n-1}\cdot z$. If $z=|z|(\cos \varphi + i\sin\varphi)$ and $n\in \N$, then
+\[
+z^n = |z|^n \big(\cos (n\varphi) + i\sin(n \varphi)\big).
+\]
+\end{theorem}
+
+\begin{example}
+We compute $(1+i)^{100}$ using $1+i = \sqrt{2}(\cos\tfrac\pi4 + i\sin\tfrac\pi4)$:
+\[
+(1+i)^{100} = \big(\sqrt{2}\big)^{100}\left(\cos\tfrac{100\pi}{4} + i \sin\tfrac{100\pi}{4}\right)
+= 2^{50}\big(\cos 25\pi +i \sin 25\pi\big) = 2^{50}(\cos \pi + i \sin \pi) = -2^{50}.
+\]
+\end{example}
+
+\begin{example}[Trigonometric identities from De Moivre's formula]
+Take $z = \cos\alpha + i\sin\alpha$ (a number of modulus $1$). De Moivre's formula gives
+$\cos 3\alpha + i \sin 3\alpha = (\cos\alpha + i \sin \alpha)^3$, and expanding the cube,
+\[
+(\cos\alpha + i\sin\alpha)^3
+= \cos^3\alpha + 3i\cos^2\alpha \sin\alpha - 3\cos\alpha\sin^2\alpha - i\sin^3\alpha.
+\]
+Comparing real and imaginary parts of both sides yields both triple-angle formulas at once:
+\[
+\cos 3\alpha = \cos^3\alpha - 3\cos\alpha \sin^2\alpha, \qquad
+\sin 3\alpha = 3\cos^2\alpha\sin\alpha - \sin^3\alpha.
+\]
+The same method expresses $\cos n\alpha$ and $\sin n\alpha$ in terms of $\cos\alpha$ and $\sin\alpha$ for
+any $n\in\N$.
+\end{example}
+
+\section{Roots of complex numbers}
+
+\begin{definition}
+For a complex number $z\neq 0$ and $n\in\N$, any number $w$ satisfying $w^n=z$ is called an \emph{$n$-th root}
+of $z$.
+\end{definition}
+
+\begin{theorem}
+Let $z=|z|(\cos \varphi + i\sin\varphi)$ and $n\in \N$. Then every $n$-th root of $z$ is of the form
+\[
+z_k = \sqrt[n]{|z|}\left(\cos \tfrac{\varphi+2k\pi}{n} + i\sin \tfrac{\varphi+2k\pi}{n}\right),
+\qquad k=0,1,\ldots, n-1.
+\]
+\end{theorem}
+
+\begin{fact}
+All of the $n$-th roots of a complex number $z$ lie on the circle centred at $0$ of radius $\sqrt[n]{|z|}$,
+and they divide its circumference into $n$ equal arcs.
+\end{fact}
+
+\begin{example}
+We find the square roots of $2i$. Writing $2i = 2\left(\cos\tfrac\pi2 + i \sin \tfrac\pi2\right)$,
+\[
+\begin{aligned}
+z_0 &= \sqrt{2}\left(\cos\tfrac{\pi}{4} + i \sin \tfrac{\pi}{4}\right)=1+i,\\
+z_1 &= \sqrt{2}\left(\cos\tfrac{5\pi}{4} + i \sin \tfrac{5\pi}{4}\right)=-1-i.
+\end{aligned}
+\]
+Indeed, one checks directly that $(1+i)^2 = 2i$ and $(-1-i)^2 = 2i$.
+\end{example}
+
+\begin{example}
+We find the cube roots of $-8$. Writing $-8 = 8(\cos\pi + i\sin\pi)$, the roots are
+\[
+z_k = 2\left(\cos \tfrac{\pi+2k\pi}{3} + i\sin \tfrac{\pi+2k\pi}{3}\right), \qquad k = 0,1,2,
+\]
+that is,
+\[
+z_0 = 2\left(\cos\tfrac\pi3 + i\sin\tfrac\pi3\right) = 1+\sqrt3\, i, \qquad
+z_1 = 2\left(\cos\pi + i\sin\pi\right) = -2, \qquad
+z_2 = 2\left(\cos\tfrac{5\pi}3 + i\sin\tfrac{5\pi}3\right) = 1-\sqrt3\, i.
+\]
+Note that $z_0$ and $z_2$ are conjugate — as they must be, being the non-real roots of the polynomial
+$x^3+8$ with real coefficients (see the last section of this chapter).
+\end{example}
+
+\begin{example}[Roots of unity]
+Taking $z=1$, the $n$-th roots of $1$ are
+\[
+z_k = \cos \tfrac {2k\pi}{n} + i \sin \tfrac{2k\pi}{n}, \qquad k=0,\ldots, n-1.
+\]
+For instance, the cube roots of unity are
+\[
+1, \qquad -\tfrac12+\tfrac{\sqrt3}{2}\,i, \qquad -\tfrac12-\tfrac{\sqrt3}{2}\,i,
+\]
+and the fourth roots of unity are $1,\ i,\ -1,\ -i$. The picture below shows the sixth roots of unity
+$z_0,\ldots,z_5$: they form a regular hexagon inscribed in the unit circle.
+
+\begin{center}
+\begin{tikzpicture}[scale=1.4,>=stealth]
+  \draw[->] (-1.5,0) -- (1.6,0) node[right] {$\Re$};
+  \draw[->] (0,-1.5) -- (0,1.5) node[above] {$\Im$};
+  \draw[remaccent!60] (0,0) circle (1);
+  \foreach \k in {0,...,5} {
+    \filldraw[defaccent] ({cos(60*\k)},{sin(60*\k)}) circle (1.4pt);
+  }
+  \draw[dashed,exaccent] (0,0) -- ({cos(60)},{sin(60)});
+  \draw[exaccent] (0.35,0) arc (0:60:0.35);
+  \node[exaccent] at (0.48,0.26) {\footnotesize $\tfrac{2\pi}{6}$};
+  \node[below right,defaccent] at (1,0) {\footnotesize $z_0=1$};
+  \node[above right,defaccent] at ({cos(60)},{sin(60)}) {\footnotesize $z_1$};
+  \node[above left,defaccent] at ({cos(120)},{sin(120)}) {\footnotesize $z_2$};
+  \node[below left,defaccent] at (-1,0) {\footnotesize $z_3=-1$};
+  \node[below left,defaccent] at ({cos(240)},{sin(240)}) {\footnotesize $z_4$};
+  \node[below right,defaccent] at ({cos(300)},{sin(300)}) {\footnotesize $z_5$};
+\end{tikzpicture}
+\end{center}
+\end{example}
+
+\section{Polynomials}
+
+\begin{definition}
+Let $\K$ be a field. A \emph{polynomial} $f$ of degree $n=:\deg(f)$ over $\K$ is an expression
+\[
+f(x) = a_n x^n + a_{n-1}x^{n-1}+\ldots + a_1 x + a_0,
+\]
+with $a_0,a_1,\ldots,a_n\in \K$ and $a_n\neq 0$. The set of all polynomials over $\K$ is denoted by $\K[x]$.
+The degree of the zero polynomial $0$ is taken to be $-\infty$.
+\end{definition}
+
+\begin{example}
+$x+1, \quad x^2+(2+i)x+i, \quad 2x^3+1$ are polynomials (the second over $\C$).
+\end{example}
+
+\begin{fact}[Division with remainder]
+Let $f$ and $g$ be polynomials over $\K$ with $g\neq 0$. Then there exist polynomials
+$q,r\in \K[x]$ such that
+\[
+f = q\cdot g + r, \qquad \deg(r)<\deg(g).
+\]
+\end{fact}
+
+\begin{example}
+For $f(x) = x^2+1$ and $g(x) = x+1$,
+\[
+x^2+1 = (x-1)(x+1)+2.
+\]
+\end{example}
+
+\begin{definition}
+A polynomial $f\in \K[x]$ is \emph{reducible} if there exist $g,h\in \K[x]$ with $\deg(g)>0$, $\deg(h)>0$ and
+$f=g\cdot h$. It is \emph{irreducible} if
+\[
+f = g\cdot h \implies \deg(g)=0 \ \text{ or } \ \deg(h)=0.
+\]
+\end{definition}
+
+\begin{example}
+$x+1$ is irreducible over both $\R$ and $\C$. The polynomial $x^2+1$ is irreducible over $\R$, but reducible
+over $\C$ since $x^2+1 = (x-i)(x+i)$.
+\end{example}
+
+An element $a\in \K$ is a \emph{root} of $f\in \K[x]$ if $f(a)=0$.
+
+\begin{theorem}[Fundamental Theorem of Algebra]
+Any polynomial $f\in \C[x]$ of degree $\deg(f)\geq 1$ has a root in $\C$.
+\end{theorem}
+
+\begin{corollary}
+Any polynomial $f\in \C[x]$ of degree $\deg(f)\geq 1$ factors into linear factors:
+\[
+f(x) = a(x-z_0)^{k_0}(x-z_1)^{k_1}\cdots (x-z_m)^{k_m},
+\]
+where $k_i>0$ and $k_0+k_1+\ldots+k_m = \deg(f)$. In particular, the only irreducible polynomials of positive
+degree over $\C$ are those of degree $1$.
+\end{corollary}
+
+\begin{theorem}[Quadratic formula over $\C$]
+For a polynomial $f(x) = ax^2 + bx + c$ with $a,b,c\in \C$ ($a\neq 0$) the roots are
+\[
+z_0 = \frac{-b-\delta}{2a}, \qquad z_1 = \frac{-b+\delta}{2a},
+\]
+where $\delta$ is any square root of $\Delta = b^2-4ac$.
+\end{theorem}
+
+\begin{example}
+\hfill
+\begin{itemize}
+\item For $x^2+2x+5$ (real coefficients) we get $\Delta = 4-20 = -16$, so we may take $\delta = 4i$, and
+\[
+z_0 = \frac{-2-4i}{2} = -1-2i, \qquad z_1 = \frac{-2+4i}{2} = -1+2i.
+\]
+The two roots are conjugate — as predicted by the theorem below.
+\item For $z^2-3z+(3-i)$ we get $\Delta = 9-4(3-i) = -3+4i$. Since $(1+2i)^2 = -3+4i$, we may take
+$\delta = 1+2i$, and
+\[
+z_0 = \frac{3-(1+2i)}{2} = 1-i, \qquad z_1 = \frac{3+(1+2i)}{2} = 2+i.
+\]
+Here the coefficients are not all real, and indeed the roots are not conjugate to each other.
+\end{itemize}
+\end{example}
+
+\begin{theorem}
+Let $f\in \R[x]$. If a complex number $z$ is a root of $f$, then so is its conjugate $\bar z$:
+\[
+f(z)=0 \implies f(\bar{z})=0.
+\]
+\end{theorem}
+
+\begin{corollary}
+The irreducible polynomials of positive degree over $\R$ are exactly the polynomials of degree $1$ and the
+polynomials of degree $2$ with $\Delta = b^2-4ac<0$.
+\end{corollary}
+
+\begin{example}
+Consider $f(x) = x^4-16$. Over $\R$ it factors as
+\[
+x^4-16 = (x^2-4)(x^2+4) = (x-2)(x+2)(x^2+4),
+\]
+and the quadratic factor $x^2+4$ (with $\Delta = -16<0$) is irreducible over $\R$. Over $\C$ the
+factorisation continues all the way down to linear factors:
+\[
+x^4-16 = (x-2)(x+2)(x-2i)(x+2i).
+\]
+The two non-real roots $\pm 2i$ form a conjugate pair.
+\end{example}

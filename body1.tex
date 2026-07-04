@@ -1,0 +1,458 @@
+\section{Motivation}
+
+If there is one mathematical habit that defines modern computing, it is this: \emph{turn your data into a
+vector}. A greyscale image of size $1000\times 1000$ is a list of a million pixel brightnesses — a vector
+in $\R^{1\,000\,000}$. An audio clip is a vector of samples. A user of a streaming service is a vector of
+ratings. A word, inside a modern language model, is a vector of a few hundred coordinates learned from
+text. Once data is a vector, geometry becomes a computational tool: similar users are \emph{nearby}
+vectors, recommendation is finding neighbours, and classification is separating regions of a space that we
+cannot draw but can compute in.
+
+The operations we axiomatise in this chapter are meaningful operations on data. Adding vectors and scaling
+them is how images are blended and audio tracks are mixed. More strikingly, in word-vector models the sum
+and difference of vectors capture \emph{meaning}: the famous relation
+\[
+\text{\itshape king} - \text{\itshape man} + \text{\itshape woman} \approx \text{\itshape queen}
+\]
+is literally vector arithmetic in the sense of this chapter.
+
+The deeper notions of the chapter answer a question every computer scientist should ask about data:
+\emph{how many numbers does it really take to describe it?}
+\begin{itemize}
+\item A \emph{spanning set} is a collection of building blocks capable of expressing everything in sight.
+\item \emph{Linear independence} means no building block is redundant: none can be reconstructed from the
+others, so none can be dropped for free.
+\item A \emph{basis} is a minimal, lossless set of building blocks, and the \emph{dimension} — the size of
+any basis — is the honest number of degrees of freedom of the data.
+\end{itemize}
+Real data rarely uses all of its apparent dimensions: photographs of faces occupy a tiny sliver of
+$\R^{1\,000\,000}$, and that sliver is well approximated by low-dimensional \emph{subspaces}. This single
+observation is why image compression, denoising and recommender systems work at all, and we will be able
+to \emph{compute} such dimensions once matrix rank is available in Chapter~\ref{ch:matrices}.
+
+One more remark on abstraction. We will not define vectors as ``arrows'' or as ``tuples of numbers'', but
+as elements of \emph{any} set equipped with a well-behaved addition and scaling — programming against an
+interface again, as in the previous chapter. The payoff is immediate: tuples, polynomials, matrices and
+functions all satisfy the axioms, so every theorem proved below holds for all of them at once.
+
+\section{Vector spaces}
+
+You are already familiar with the two-dimensional vector space
+\[
+\R^2 = \{(x,y)\mid x,y\in \R\}.
+\]
+In $\R^2$ vectors can be added and multiplied by a number called a \emph{scalar}:
+\[
+(x_1,y_1)\oplus(x_2,y_2) = (x_1+x_2,\, y_1+y_2), \qquad
+\lambda \odot (x,y) = (\lambda x,\, \lambda y) \text{ for } \lambda\in \R.
+\]
+The abstract notion of a vector space axiomatises exactly these two operations.
+
+\begin{definition}
+Let $\K$ be a field. A set $\V$ together with two operations:
+\begin{itemize}
+\item \emph{vector addition} $+\colon \V\times \V\to \V$ and
+\item \emph{scalar multiplication} $\cdot\colon \K\times \V\to \V$
+\end{itemize}
+is called a \emph{vector space} over the field $\K$ if it satisfies the following conditions:
+\begin{itemize}
+\item for any $\uu,\vv,\ww\in \V$ we have $\uu+\vv=\vv+\uu$ and $\uu+(\vv+\ww) = (\uu+\vv)+\ww$;
+\item there is $\0\in \V$, called the \emph{zero vector}, such that for any $\vv\in\V$ we have
+$\vv+\0 =\0+\vv=\vv$;
+\item for any $\vv\in\V$ there is $-\vv\in\V$ such that $\vv+(-\vv) = (-\vv)+\vv = \0$;
+\item for any $\uu,\vv\in \V$ and any scalar $\lambda\in \K$ we have
+$\lambda\cdot(\uu+\vv)=\lambda\cdot \uu + \lambda\cdot\vv$;
+\item for any $\uu\in \V$ and any scalars $\lambda_1,\lambda_2\in \K$ we have
+$(\lambda_1+\lambda_2)\cdot\uu=\lambda_1\cdot \uu + \lambda_2\cdot\uu$;
+\item for any $\uu\in \V$ and any scalars $\lambda_1,\lambda_2\in \K$ we have
+$(\lambda_1 \lambda_2)\cdot\uu=\lambda_1\cdot (\lambda_2\cdot\uu)$;
+\item for any $\uu\in \V$ we have $1\cdot \uu=\uu$.
+\end{itemize}
+The elements of $\V$ are called \emph{vectors} and the elements of $\K$ are called \emph{scalars}.
+\end{definition}
+
+\begin{fact}[Elementary consequences of the axioms]
+Let $\V$ be a vector space over $\K$. For any $\vv\in\V$ and $\lambda\in\K$:
+\[
+0\cdot \vv = \0, \qquad \lambda\cdot \0 = \0, \qquad (-1)\cdot \vv = -\vv,
+\qquad \text{and} \qquad \lambda\cdot\vv = \0 \implies \lambda = 0 \ \text{ or } \ \vv = \0.
+\]
+\end{fact}
+
+\begin{proof}
+We prove the first equality; the others are proved similarly. By distributivity,
+\[
+0\cdot \vv = (0+0)\cdot \vv = 0\cdot\vv + 0\cdot \vv,
+\]
+and adding $-(0\cdot\vv)$ to both sides gives $\0 = 0\cdot\vv$.
+\end{proof}
+
+\begin{example}[The space $\K^n$]
+Let $\K$ be any field and let $n\in \N$. Then
+\[
+\K^n=\{(x_1,\ldots,x_n)\mid x_i\in \K\}
+\]
+together with vector addition
+\[
+(x_1,\ldots,x_n) + (y_1,\ldots,y_n) = (x_1+y_1,\ldots,x_n+y_n)
+\]
+and scalar multiplication
+\[
+\lambda\cdot (x_1,\ldots,x_n) = (\lambda x_1,\ldots,\lambda x_n) \qquad (\lambda \in \K)
+\]
+forms a vector space over $\K$. The zero vector is $\0 = (0,\ldots,0)$.
+
+In the case $\K=\R$ and $n=2$ we recover the well-known space $\R^2$. Taking $\K=\C$ we obtain
+$\C^n = \{(z_1,\ldots, z_n)\mid z_i\in\C\}$.
+\end{example}
+
+\begin{example}[Bit vectors]
+The field $\K$ in the previous example may also be finite. Taking $\K=\Z_2$ gives the space $\Z_2^n$ of
+\emph{bit vectors}: vector addition is bitwise XOR, e.g.\ in $\Z_2^4$,
+\[
+(1,0,1,1)+(1,1,0,1) = (0,1,1,0),
+\]
+and the only scalars are $0$ and $1$. Note that every vector is its own additive inverse. Identifying a
+subset of $\{1,\ldots,n\}$ with its characteristic bit vector, we may equally view $\Z_2^n$ as the set
+$2^{\{1,\ldots,n\}}$ of all subsets of $\{1,\ldots,n\}$, with the symmetric difference as vector addition.
+Vector spaces over $\Z_2$ are the natural home of error-correcting codes and appear throughout
+cryptography.
+\end{example}
+
+\begin{example}[Complex numbers as a real vector space]
+Recall that the set of complex numbers is $\C = \R\times\R =\{(a,b)\mid a,b\in \R\}$. Together with the
+standard addition of complex numbers and multiplication by real scalars, $\C$ can be viewed as a vector
+space over the field $\R$.
+\end{example}
+
+\begin{example}[Polynomials]
+Let $\K$ be a field. The set $\K[x]$ of all polynomials over $\K$, with the standard polynomial addition and
+multiplication by a constant from $\K$, forms a vector space over $\K$. The zero vector is the zero
+polynomial $0$. Similarly, the set $\K_n[x]$ of polynomials of degree less than or equal to $n$ over $\K$
+is a vector space.
+\end{example}
+
+\begin{example}[Function spaces]
+Let $X$ be a non-empty set and $\K$ a field. The set $\K^X$ of all functions $f\colon X\to \K$, with the
+pointwise operations
+\[
+(f+g)(x) = f(x)+g(x), \qquad (\lambda\cdot f)(x) = \lambda\cdot f(x),
+\]
+is a vector space over $\K$. The zero vector is the constant function $0$. For $X=\R$ and $\K=\R$ we obtain
+the space of all real functions of one real variable.
+\end{example}
+
+\section{Subspaces}
+
+\begin{definition}
+Let $\V$ be a vector space over $\K$. A subset $\W\subseteq \V$ is called a \emph{subspace} of $\V$ if $\W$ is
+itself a vector space over $\K$ under the same operations of vector addition and scalar multiplication.
+\end{definition}
+
+\noindent To put it differently, a subset $\W\subseteq \V$ is a subspace of $\V$ if
+\begin{itemize}
+\item for any $\ww_1,\ww_2\in \W$ we have $\ww_1+\ww_2\in \W$;
+\item $\0\in \W$;
+\item for any $\ww\in \W$ we have $-\ww\in \W$;
+\item for any scalar $\lambda\in \K$ and any $\ww\in \W$ we have $\lambda\cdot \ww\in \W$.
+\end{itemize}
+
+\begin{example}
+Consider the vector space $\R^3 = \{(x,y,z)\mid x,y,z\in\R\}$. The set
+\[
+W = \{(x,y,z)\mid 2x+y+3z = 0\}
+\]
+is a subspace of $\R^3$. Indeed, $\0 = (0,0,0)\in W$; if $\ww_1=(x_1,y_1,z_1)$ and $\ww_2=(x_2,y_2,z_2)$
+both satisfy the equation, then so does their sum,
+\[
+2(x_1+x_2)+(y_1+y_2)+3(z_1+z_2) = \underbrace{(2x_1+y_1+3z_1)}_{=\,0} + \underbrace{(2x_2+y_2+3z_2)}_{=\,0} = 0,
+\]
+and so does every multiple: $2(\lambda x_1)+\lambda y_1+3(\lambda z_1) = \lambda\cdot 0 = 0$, which covers
+both $\lambda\ww_1\in W$ and $-\ww_1\in W$.
+
+On the other hand, the set $W' = \{(x,y,z)\mid x^2 = 1\}$ is \emph{not} a subspace of $\R^3$: it does not
+contain the zero vector, and it is not closed under addition either, since $(1,0,0)\in W'$ but
+$(1,0,0)+(1,0,0) = (2,0,0)\notin W'$.
+\end{example}
+
+\begin{example}
+Consider the vector space $\C$ over $\R$. The set $\{z\in\C\mid \Re(z) = 0\}$ is a subspace of $\C$.
+\end{example}
+
+\begin{warning}
+The intersection of two subspaces of $\V$ is always a subspace, but their \emph{union} usually is not. In
+$\R^2$ the two axes $W_1 = \{(x,0)\mid x\in\R\}$ and $W_2 = \{(0,y)\mid y\in\R\}$ are subspaces, yet
+$(1,0)+(0,1) = (1,1)\notin W_1\cup W_2$, so $W_1\cup W_2$ is not closed under addition.
+\end{warning}
+
+\section{Linear combinations and span}
+
+\begin{definition}
+Let $\V$ be a vector space over a field $\K$, let $a_1,\ldots,a_n\in \K$ and $\vv_1,\ldots,\vv_n\in \V$. The vector
+\[
+a_1\vv_1+\ldots + a_n\vv_n\in \V
+\]
+is called the \emph{linear combination} of the vectors $\vv_1,\ldots,\vv_n$ with coefficients $a_1,\ldots,a_n$.
+\end{definition}
+
+\begin{example}
+In $\R^2$ the vector $(2,3)$ is a linear combination of $(1,1)$ and $(0,1)$ with coefficients $2$ and $1$:
+\[
+(2,3) = 2\cdot (1,1) + 1\cdot (0,1).
+\]
+\end{example}
+
+\begin{definition}
+Let $\V$ be a vector space over a field $\K$ and let $S\subseteq \V$ be a set of vectors. By the \emph{span} of
+$S$ we mean the set
+\[
+\Span{S} = \{a_1\vv_1+\ldots + a_n\vv_n\mid a_i\in \K \text{ and } \vv_i\in S\}\subseteq \V.
+\]
+In other words, $\Span{S}$ is the set of all possible linear combinations of vectors from $S$.
+\end{definition}
+
+\begin{example}
+Consider $\R^3$ and the two vectors $(1,2,0),(0,0,3)\in \R^3$. Then
+\[
+\Span{\{(1,2,0),(0,0,3)\}} = \{ a(1,2,0)+b(0,0,3)\mid a,b\in \R\} = \{ (a,2a,3b)\mid a,b\in \R\}.
+\]
+\end{example}
+
+\begin{theorem}
+Let $\V$ be a vector space over a field $\K$ and let $\vv_1,\ldots,\vv_n\in \V$. Then the set
+\[
+\Span{\{\vv_1,\ldots,\vv_n\}} = \{a_1\vv_1+\ldots + a_n\vv_n\mid a_i\in \K\}
+\]
+is a subspace of $\V$ containing the vectors $\vv_1,\ldots,\vv_n$.
+\end{theorem}
+
+\begin{proof}
+Take $\uu,\ww\in \Span{\{\vv_1,\ldots,\vv_n\}}$, that is
+\[
+\uu = a_1\vv_1+\ldots + a_n\vv_n, \qquad \ww = b_1\vv_1+\ldots + b_n\vv_n,
+\]
+for some $a_i,b_i\in \K$. We check the four conditions for a subspace.
+\begin{itemize}
+\item $\uu+\ww\in \Span{\{\vv_1,\ldots,\vv_n\}}$, because
+\[
+\uu+\ww = (a_1+b_1)\vv_1+\ldots + (a_n+b_n)\vv_n.
+\]
+\item $-\uu\in \Span{\{\vv_1,\ldots,\vv_n\}}$, because
+\[
+-\uu = (-a_1)\vv_1+\ldots + (-a_n)\vv_n.
+\]
+\item $\0\in \Span{\{\vv_1,\ldots,\vv_n\}}$, because $\0 = 0\cdot\vv_1+\ldots + 0\cdot \vv_n$.
+\item $\lambda\cdot\uu\in \Span{\{\vv_1,\ldots,\vv_n\}}$ for any $\lambda\in\K$, because
+\[
+\lambda\cdot \uu = (\lambda a_1)\vv_1+\ldots + (\lambda a_n)\vv_n. \qedhere
+\]
+\end{itemize}
+\end{proof}
+
+\begin{fact}[Properties of the span]
+Let $\V$ be a vector space and let $S,T\subseteq \V$. Then:
+\begin{itemize}
+\item $S\subseteq \Span{S}$;
+\item if $S\subseteq T$, then $\Span{S}\subseteq \Span{T}$;
+\item $\Span{\Span{S}} = \Span{S}$;
+\item $\Span{S}$ is the \emph{smallest} subspace of $\V$ containing $S$: if $W$ is a subspace of $\V$ and
+$S\subseteq W$, then $\Span{S}\subseteq W$.
+\end{itemize}
+\end{fact}
+
+\begin{example}
+\hfill
+\begin{itemize}
+\item $\C$ over $\R$:
+\[
+\Span{\{1,i\}} = \{a+bi\mid a,b\in \R\} = \C, \qquad \Span{\{i,2+i\}} = \C,
+\]
+\[
+\Span{\{3+i\}} = \{3a+ai\mid a\in \R\} \neq \C.
+\]
+\item $\R[x]$ over $\R$:
+\[
+\Span{\{x^2,x,1\}} = \Span{\{x^2,x,1,x^2+5\}} = \{ax^2+bx+c\mid a,b,c\in \R\},
+\]
+the space of quadratic functions.
+\end{itemize}
+\end{example}
+
+\begin{example}[Testing membership in a span]
+Is $(1,2,3)\in\Span{\{(1,1,1),(1,0,1)\}}$ in $\R^3$? We look for $a,b\in\R$ with
+\[
+a(1,1,1)+b(1,0,1) = (1,2,3), \qquad\text{i.e.}\qquad a+b = 1,\quad a = 2,\quad a+b = 3.
+\]
+The first and third equations contradict each other, so no such $a,b$ exist:
+$(1,2,3)\notin \Span{\{(1,1,1),(1,0,1)\}}$. On the other hand, for the vector $(3,1,3)$ the same equations
+give $a = 1$, $b = 2$, consistently, hence
+\[
+(3,1,3) = 1\cdot (1,1,1)+2\cdot (1,0,1) \in \Span{\{(1,1,1),(1,0,1)\}}.
+\]
+Deciding membership in a span always amounts to solving a system of linear equations; the systematic theory
+of such systems is developed in Chapter~\ref{ch:sole}.
+\end{example}
+
+\section{Linear independence and basis}
+
+\begin{definition}
+Let $\V$ be a vector space over a field $\K$. A set $S\subseteq \V$ of vectors is \emph{linearly independent}
+if for any $\vv_1,\ldots,\vv_n \in S$ and any $a_1,\ldots,a_n\in \K$
+\[
+a_1\vv_1+\ldots+a_n\vv_n = \0 \implies a_1=\ldots =a_n=0.
+\]
+Otherwise, the set $S$ is \emph{linearly dependent}.
+\end{definition}
+
+\begin{example}
+In $\R^2$ over $\R$ the set $\{(0,1),(1,1)\}$ is linearly independent, because the linear combination
+$a(0,1)+b(1,1) = (b,a+b)$ equals the zero vector $(0,0)$ only if $b=0$ and $a+b=0$, that is $a=b=0$.
+\end{example}
+
+\begin{example}
+\hfill
+\begin{itemize}
+\item $\C$ over $\R$: $\{1,i\}$ is linearly independent, since $a\cdot 1 + b\cdot i = 0\implies a=b=0$.
+\item $\R[x]$ over $\R$: $\{x+1, x-1, 2\}$ is linearly dependent, because
+\[
+(x+1)+(-1)(x-1)+(-1)\cdot 2 = 0.
+\]
+\item $\R[x]$ over $\R$: the set $\{1,x,x^2,x^3,\ldots \}$ is linearly independent.
+\end{itemize}
+\end{example}
+
+\begin{example}[Testing linear independence]
+Are the vectors $(1,2,3)$, $(2,1,0)$, $(1,-4,-9)$ linearly independent in $\R^3$? We solve
+\[
+a(1,2,3)+b(2,1,0)+c(1,-4,-9) = (0,0,0), \qquad\text{i.e.}\qquad
+\begin{aligned}
+a+2b+c &= 0,\\ 2a+b-4c &= 0,\\ 3a-9c &= 0.
+\end{aligned}
+\]
+The third equation gives $a = 3c$; substituting into the first gives $b = -2c$, and the second equation is
+then satisfied automatically. Taking $c = 1$ produces a non-trivial combination
+\[
+3\cdot(1,2,3) - 2\cdot (2,1,0) + 1\cdot (1,-4,-9) = (0,0,0),
+\]
+so the vectors are linearly \emph{dependent}.
+\end{example}
+
+\begin{fact}
+Let $\V$ be a vector space over $\K$. The set $\{\vv_1,\ldots, \vv_n\}\subseteq \V$ is linearly dependent if and
+only if at least one of the vectors $\vv_i$ can be expressed as a linear combination of the others.
+\end{fact}
+
+\begin{fact}
+Let $\V$ be a vector space over $\K$. If the set $S\subseteq\V$ is linearly independent, then any subset
+$S'\subseteq S$ is also linearly independent.
+\end{fact}
+
+\begin{definition}
+Let $\V$ be a vector space over a field $\K$. A set $B\subseteq \V$ of vectors is called a \emph{basis} of $\V$ if
+\begin{itemize}
+\item $B$ is linearly independent, and
+\item $\Span{B} = \V$.
+\end{itemize}
+\end{definition}
+
+\begin{example}
+\hfill
+\begin{itemize}
+\item For the vector space $\R^2$ over $\R$ the set $\{(1,0),(1,1)\}$ is a basis.
+\item $\C$ over $\R$: the set $\{1,i\}$ is a basis of $\C$; so is, for instance, $\{1,i+2\}$.
+\item For the vector space $\K^n$ over $\K$ the set
+\[
+\{(1,0,\ldots,0),(0,1,\ldots,0),\ldots,(0,0,\ldots,1)\}
+\]
+is a basis, called the \emph{standard basis} of $\K^n$; its elements are denoted by $e_1,e_2,\ldots,e_n$.
+\item $\K_n[x]$ over $\K$: the set $\{1,x,x^2,x^3,\ldots, x^n\}$ is a basis of $\K_n[x]$.
+\end{itemize}
+\end{example}
+
+\begin{theorem}
+Let $\V$ be a vector space over $\K$. A set $\{\vv_1,\ldots,\vv_n\}\subseteq \V$ is a basis of $\V$ if and only if
+every vector $\ww\in \V$ can be expressed \emph{uniquely} as a linear combination of $\vv_1,\ldots,\vv_n$.
+\end{theorem}
+
+\begin{proof}
+($\Rightarrow$) Suppose $\ww=a_1\vv_1+\ldots+a_n\vv_n$ and $\ww=b_1\vv_1+\ldots+b_n\vv_n$. Then
+\[
+(a_1-b_1)\vv_1+\ldots+(a_n-b_n)\vv_n = \0.
+\]
+Since $\{\vv_1,\ldots,\vv_n\}$ is linearly independent, $a_1-b_1=0,\ldots,a_n-b_n=0$, that is
+$a_1=b_1,\ldots, a_n=b_n$.
+
+($\Leftarrow$) Since every $\ww\in \V$ is a linear combination of $\vv_1,\ldots,\vv_n$, we have
+$\Span{\{\vv_1,\ldots,\vv_n\}} =\V$. It remains to show linear independence. The zero vector has the
+representation $\0=0\cdot\vv_1+\ldots+0\cdot\vv_n$. Since the representation of every vector is unique,
+\[
+a_1\vv_1+\ldots+a_n\vv_n =\0 \implies a_1=a_2=\ldots =a_n=0. \qedhere
+\]
+\end{proof}
+
+\begin{definition}
+Let $B = \{\vv_1,\ldots,\vv_n\}$ be a basis of $\V$ (with a fixed order of its elements) and let
+$\ww\in \V$. The unique scalars $a_1,\ldots,a_n\in\K$ with $\ww = a_1\vv_1+\ldots+a_n\vv_n$ are called the
+\emph{coordinates} of $\ww$ in the basis $B$.
+\end{definition}
+
+\begin{example}
+In $\R^2$, take the basis $B = \{(1,0),(1,1)\}$ and $\ww = (2,3)$. Solving $(2,3) = a(1,0)+b(1,1)$ gives
+$b = 3$ and $a = -1$, so the coordinates of $(2,3)$ in $B$ are $(-1,3)$. In the standard basis
+$\{(1,0),(0,1)\}$ the coordinates of $(2,3)$ are simply $(2,3)$.
+\end{example}
+
+\section{Dimension}
+
+\begin{theorem}
+Let a vector space $\V$ have a finite basis. Then any two bases of $\V$ have the same size.
+\end{theorem}
+
+\begin{definition}
+If a vector space $\V$ has a finite basis, then the \emph{dimension} of $\V$ is the size of any basis of $\V$.
+Otherwise the dimension is defined to be $\infty$. We denote this number by $\dim(\V)$.
+\end{definition}
+
+\begin{example}
+\hfill
+\begin{itemize}
+\item $\dim(\{ \0\}) = 0$;
+\item $\dim( \K^n) = n$;
+\item $\dim(\K[x])=\infty$;
+\item $\dim(\K_n[x])=n+1$;
+\item $\dim(\C \text{ over } \R)=2$;
+\item $\dim(\C \text{ over } \C)=1$.
+\end{itemize}
+\end{example}
+
+\begin{theorem}
+If $\W$ is a subspace of a vector space $\V$, then
+\begin{itemize}
+\item $\dim(\W) \leq \dim(\V)$;
+\item if $\V$ is finite dimensional, then $\dim(\W) = \dim(\V)$ implies $\W=\V$.
+\end{itemize}
+\end{theorem}
+
+\begin{theorem}
+Let $\V$ be a vector space with $\dim(\V)=n$ and let $S\subseteq \V$. Then:
+\begin{itemize}
+\item if $\Span{S}=\V$, then $|S|\geq n$;
+\item if $S$ is linearly independent and $|S|=n$, then $S$ is a basis;
+\item if $\Span{S}=\V$ and $|S|=n$, then $S$ is a basis;
+\item if $|S|>n$, then $S$ is linearly dependent.
+\end{itemize}
+\end{theorem}
+
+\begin{theorem}
+Let $\V$ be a vector space with $\dim(\V) = n<\infty$. Then:
+\begin{itemize}
+\item every linearly independent set $S\subseteq \V$ can be extended to a basis of $\V$;
+\item every set $S\subseteq \V$ with $\Span{S} = \V$ contains a basis of $\V$.
+\end{itemize}
+\end{theorem}
+
+\begin{example}
+The set $\{(1,1,0)\}$ is linearly independent in $\R^3$; it can be extended to a basis, e.g.\
+$\{(1,1,0),(0,1,0),(0,0,1)\}$: a quick check shows that these three vectors are linearly independent, and
+by the previous theorem three linearly independent vectors in a $3$-dimensional space form a basis.
+\end{example}
