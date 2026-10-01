@@ -1,0 +1,62 @@
+\begin{exercise}
+Decide whether the given sequence of vectors is linearly independent in the indicated vector space:
+\begin{enumerate}[label=(\alph*)]
+\item $\big((1,0,1),(1,1,0),(0,1,1)\big)$ in $\R^3$ over $\R$
+\item $\big((1,0,1),(1,1,0),(0,1,1)\big)$ in $\Z_2^3$ over $\Z_2$
+\end{enumerate}
+\end{exercise}
+
+\begin{exercise}
+Let $\V$ be any vector space over a field $\K$ and let $\vv_1,\vv_2,\ldots,\vv_n,\uu \in \V$. Decide
+whether the given sequence of vectors is linearly independent:
+\begin{enumerate}[label=(\alph*)]
+\item $(\vv_1,\ \vv_1+\vv_2,\ \vv_1+\vv_2+\vv_3,\ \ldots,\ \vv_1+\ldots+\vv_{n-1}+\vv_n)$ if the sequence
+$(\vv_1,\vv_2,\ldots,\vv_n)$ is linearly independent
+\item $(\vv_1+\vv_2,\ \vv_2+\vv_3,\ \ldots,\ \vv_{n-1}+\vv_n,\ \vv_n+\vv_1)$ if the sequence
+$(\vv_1,\vv_2,\ldots,\vv_n)$ is linearly independent
+\item $(\vv_1+\uu,\ \vv_2+\uu,\ \ldots,\ \vv_n+\uu)$ if the sequence $(\vv_1,\vv_2,\ldots,\vv_n)$ is
+linearly independent and $\uu\in \V$ is any vector
+\item $S$, where $S$ is a subsequence of a linearly independent sequence $T$ of vectors from $\V$
+\item $S$, where $S$ is a sequence of vectors from $\V$ containing a linearly independent subsequence $T$
+\item ($\ast$) $(\vv_1,\vv_2,\ldots,\vv_n)$, where $\vv_i\in\Span{S_i}$ and $\vv_i\neq \0$ for
+$i = 1,2,\ldots,n$, the sets $S_i\subseteq \V$ are finite and pairwise disjoint, and the set
+$S_1\cup S_2\cup\ldots\cup S_n$ consists of linearly independent vectors.
+\end{enumerate}
+\end{exercise}
+
+\begin{exercise}
+Find the dimension of each of the following vector spaces:
+\begin{enumerate}[label=(\alph*)]
+\item $\C$ over $\R$
+\item $\K^n$ over any field $\K$
+\item $\Span{\{\vv_1,\vv_2,\ldots,\vv_{n-1}\}}$, where $(\vv_1,\vv_2,\ldots,\vv_n)$ is a basis of a
+vector space $\V$ over a field $\K$
+\item $\Span{\{\vv_n,\vv_{n-1},\ldots,\vv_1\}}$, where $(\vv_1,\vv_2,\ldots,\vv_n)$ is a basis of a
+vector space $\V$ over a field $\K$
+\item $\{(x,y,z,t)\in\R^4 \mid x+y+z+t = 0\}$
+\item $\{(x,y,z,t)\in\R^4 \mid 2x+y = z-t\}$
+\item $\Span{\{(1,2,1,0),(1,3,1,1),(0,1,2,-1),(-3,1,2,2)\}}$ over $\R$
+\item $2^{\{a,b,c\}}$ over $\Z_2$ (with the symmetric difference as vector addition).
+\end{enumerate}
+\end{exercise}
+
+\begin{exercise}
+Calculate the coordinates of the vector $\vv$ with respect to the basis $S$:
+\begin{enumerate}[label=(\alph*)]
+\item $\vv = (1,2,3,4)$, $\ S = \big((1,1,1,1),(1,1,1,0),(1,1,0,1),(1,0,1,1)\big)$
+\item $\vv = \{a,b\}$, $\ S = \big(\{a\},\{b\},\{c\}\big)$ in the vector space $2^{\{a,b,c\}}$ over
+$\Z_2$
+\item $\vv = \vv_1$, $\ S = (\vv_1,\vv_2,\ldots,\vv_n)$
+\item $\vv = \vv_1+\vv_2+\ldots+\vv_n$, $\ S = (\vv_1,\vv_2,\ldots,\vv_n)$.
+\end{enumerate}
+\end{exercise}
+
+\begin{exercise}[$\ast$]
+Prove that if $(\vv_1,\vv_2,\ldots,\vv_n)$ is a basis of a vector space $\V$, then so is
+$(\vv_1,\ \vv_1+\vv_2,\ \ldots,\ \vv_1+\vv_2+\ldots+\vv_n)$.
+\end{exercise}
+
+\begin{exercise}[$\ast$]
+Prove that $\dim\Span{A\cup B} \leq \dim\Span{A} + \dim\Span{B}$ for subsets $A,B$ of a vector space
+$\V$.
+\end{exercise}

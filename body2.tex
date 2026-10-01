@@ -201,6 +201,17 @@ B\cdot A = \left( \begin{array}{ccc} 5 & 2 & 8 \\ 2 & 1 & 3 \\ 1 & 0 & 2 \end{ar
 In particular, $A\cdot B$ and $B\cdot A$ need not even have the same size.
 \end{example}
 
+\begin{remark}[Matrix--vector products]
+An important special case is $n = 1$: the product of an $m\times n$ matrix $A$ with a column vector
+$\vv\in\K^n$ is a column vector $A\vv\in\K^m$. Writing the definition out reveals a useful reading:
+\[
+A \left(\begin{array}{c} x_1\\ \vdots\\ x_n\end{array}\right)
+= x_1\cdot \big(\text{1st column of } A\big) + \ldots + x_n\cdot \big(\text{$n$-th column of } A\big),
+\]
+i.e.\ $A\vv$ is the \emph{linear combination of the columns of $A$} with coefficients the entries of
+$\vv$. This observation will be used repeatedly in Chapters~\ref{ch:sole} and~\ref{ch:linear-mappings}.
+\end{remark}
+
 \begin{remark}
 All of matrix algebra works verbatim over \emph{any} field $\K$ — including the finite fields $\Z_p$ —
 and the same is true of everything that follows in this book: row reduction, rank, systems of linear
@@ -266,6 +277,20 @@ $A = \left( \begin{smallmatrix} 0 & 1 \\ 0 & 0 \end{smallmatrix} \right)$ we hav
 $A\cdot A = 0$. Consequently, one cannot cancel in matrix equations: $A\cdot B = A\cdot C$ does \emph{not}
 imply $B = C$.
 \end{warning}
+
+\begin{definition}[Matrix powers]
+For a square matrix $A$ we set $A^0 = I$ and $A^{k} = A^{k-1}\cdot A$ for $k\geq 1$. Since matrix
+multiplication is associative, the usual rules $A^k\cdot A^l = A^{k+l}$ and $(A^k)^l = A^{kl}$ hold.
+\end{definition}
+
+\begin{example}[Counting walks in a graph]
+Let $A$ be the \emph{adjacency matrix} of a graph: $a_{ij} = 1$ if there is an edge from node $i$ to node
+$j$, and $a_{ij} = 0$ otherwise. Then the $ij$-entry of $A^k$ counts the walks of length $k$ from $i$ to
+$j$. For $k = 2$ this is immediate from the definition of the product: the entry
+$\sum_{m} a_{im}\,a_{mj}$ gains $1$ exactly for those intermediate nodes $m$ with a step $i\to m$ and a
+step $m\to j$; the general case follows by induction. This is the walk-counting claim of the motivation
+section made precise.
+\end{example}
 
 \begin{definition}[Transpose]
 Let $A=(a_{ij})$ be an $m\times n$ matrix. The \emph{transpose} of $A$, denoted $A^T$, is the $n\times m$
@@ -363,8 +388,8 @@ using elementary row operations.
 A matrix $A$ is in \emph{row echelon form} if
 \begin{enumerate}
 \item all zero rows are at the bottom, and
-\item the first nonzero entry in the $i$-th row lies to the right of the first nonzero entry of the row above
-it.
+\item the first nonzero entry in the $i$-th row — called the \emph{leading entry} (or \emph{pivot}) of that
+row — lies to the right of the leading entry of the row above it.
 \end{enumerate}
 \end{definition}
 
@@ -415,6 +440,11 @@ For every matrix $A$ the row rank of $A$ equals the column rank of $A$.
 \begin{definition}
 The \emph{rank} of a matrix $A$, denoted $\rank(A)$, is its row rank (equivalently, its column rank).
 \end{definition}
+
+\begin{fact}
+For any $m\times n$ matrix $A$ we have $\rank(A) = \rank(A^T)$ and $\rank(A)\leq \min(m,n)$: the rank is
+bounded both by the number of rows and by the number of columns.
+\end{fact}
 
 \begin{example}
 Consider $A=\left( \begin{smallmatrix} 1 & 2\\ 2 & 4 \end{smallmatrix} \right)$. Then

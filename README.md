@@ -24,13 +24,18 @@ slides (`02 complex numbers`, `03 vector spaces`, `04 matrices`,
 | `body3.tex` | Ch. 5 — Systems of linear equations (incl. homogeneous systems) |
 | `body4.tex` | Ch. 6 — Determinants and matrix inversion (Laplace, Cramer) |
 | `body5.tex` | Ch. 7 — Linear mappings |
-| `body6.tex` | Ch. 8 — Eigenvalues and eigenvectors (incl. PageRank application) |
+| `body6.tex` | Ch. 8 — Eigenvalues and eigenvectors (incl. PageRank lecture and an AI outlook section) |
 | `body_exercises.tex` | Ch. E — Exercises: the ten tutorial series (`../LAG_T_*.pdf`) transcribed in book notation |
+| `exercise-sheets/` | The same exercises, as standalone per-topic PDFs students can download individually (see its own README) |
 | `Eigenvectors.png`, `03fig01.png` | Figures used in the notes |
 | `LinearAlgebra.pdf` | Compiled result |
 
 The complex plane (Argand diagram) is drawn with TikZ, so no external image is
 needed for it.
+
+`body_exercises.tex` does not contain the exercise text itself: each section `\input`s the matching
+file in `exercise-sheets/content/`, which is also what the standalone sheets in `exercise-sheets/`
+are built from, so the problems are maintained in one place.
 
 ## Requirements
 

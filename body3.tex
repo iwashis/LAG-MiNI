@@ -146,6 +146,13 @@ This procedure is known as \emph{Gaussian elimination}. Reading the solutions of
 the last equation upwards, is called \emph{back substitution}.
 \end{remark}
 
+\begin{definition}
+Let $A'X = B'$ be a system in echelon form. The unknowns multiplying the leading entries of the rows of
+$A'$ are called \emph{leading variables}; the remaining unknowns are the \emph{free variables}. To read
+off the solutions one assigns arbitrary parameter values to the free variables and computes the leading
+variables by back substitution.
+\end{definition}
+
 \begin{example}[A unique solution]
 Consider the system
 \[
@@ -193,7 +200,7 @@ x + 4y - 3z +2t &= 5,\\ z-4t &= 2.
 \end{aligned}
 \]
 This echelon system has $2$ equations and $4$ unknowns, hence more than one solution. We assign arbitrary
-values to the non-leading variables $y=a$ and $t=b$. Substitution gives $z=2+4b$ and $x=11-4a+10b$. The
+values to the free variables $y=a$ and $t=b$. Substitution gives $z=2+4b$ and $x=11-4a+10b$. The
 solution depends on two parameters:
 \[
 x=11-4a+10b, \quad y = a, \quad z = 2+4b, \quad t=b.
@@ -217,6 +224,14 @@ The last row reads $0=1$, so this system has no solutions.
 \begin{theorem}[Kronecker--Capelli]
 A system $AX=B$ of linear equations has a solution if and only if $\rank(A) = \rank(A\mid B)$.
 \end{theorem}
+
+\begin{corollary}[Number of solutions]
+Let $AX = B$ be a solvable system with $n$ unknowns and let $r = \rank(A) = \rank(A\mid B)$. If $r = n$,
+the system has exactly one solution. If $r<n$, the solutions are described by $n-r$ free parameters: over
+an infinite field such as $\R$ or $\C$ this means infinitely many solutions, and over a finite field
+$\Z_p$ it means exactly $p^{\,n-r}$ of them. In particular, a system over $\R$ has no solution, exactly
+one solution, or infinitely many — never, say, exactly two.
+\end{corollary}
 
 \begin{example}
 For the system from the previous example,
@@ -263,6 +278,11 @@ A system of linear equations is called \emph{homogeneous} if it has the form $A\
 
 \noindent A homogeneous system \emph{always} has the solution $x_1=0, x_2=0,\ldots,x_n=0$. Any other solution
 (if one exists) is called a \emph{non-trivial} solution.
+
+\begin{fact}
+A homogeneous system with fewer equations than unknowns ($m<n$) always has a non-trivial solution: indeed
+$\rank(A)\leq m<n$, so after row reduction at least one variable is free.
+\end{fact}
 
 \begin{example}
 The homogeneous system
@@ -317,6 +337,12 @@ A(\vv_1+\vv_2) = A\vv_1+A\vv_2 = \0+\0=\0,
 \]
 hence $\vv_1+\vv_2\in W$. Similarly, for any $k\in \K$ we have $A(k\vv_1)=kA\vv_1=\0$, so $k\cdot \vv_1\in W$.
 \end{proof}
+
+\begin{remark}
+The dimension formula is visible in the algorithm itself: solving $AX=\0$ by Gaussian elimination leaves
+$\rank(A)$ leading variables and $n-\rank(A)$ free variables, and setting one free variable to $1$ and the
+others to $0$ — as in the next example — produces a basis of $W$ with $n-\rank(A)$ elements.
+\end{remark}
 
 \begin{example}
 Consider the homogeneous system
