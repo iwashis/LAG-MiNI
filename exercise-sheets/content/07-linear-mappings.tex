@@ -1,0 +1,68 @@
+\begin{exercise}
+Verify which of the following mappings are linear:
+\begin{enumerate}[label=(\alph*)]
+\item $F\colon\R^3\to\R^2$, $\ F(x,y,z) = (x,\,z)$
+\item $F\colon\R^2\to\R^2$, $\ F(x,y) = (3x+y+1,\ 2x-3y)$
+\item $F\colon\R^2\to\R^3$, $\ F(x,y) = (x+2y,\ x-y,\ x)$
+\item $F\colon\R\to\R$, $\ F(x) = |x|$
+\item $F\colon\R^3\to\R^3$, $\ F(x,y,z) = (xy,\ x,\ z)$
+\end{enumerate}
+\end{exercise}
+
+\begin{exercise}
+Let $T\colon\C\to\C$, $\ T(z) = \bar z$.
+\begin{enumerate}[label=(\alph*)]
+\item Show that $T$ is \emph{not} linear if we consider $\C$ as a vector space over itself.
+\item Show that $T$ is linear if we consider $\C$ as a vector space over $\R$.
+\end{enumerate}
+\end{exercise}
+
+\begin{exercise}\label{ex:ker-im}
+Find $\ker F$, $\operatorname{im} F$, $\rank(F)$ and the nullity of $F$ for the following linear mappings
+$F\colon U\to V$:
+\begin{enumerate}[label=(\alph*)]
+\item $U = V = \R^3$, $\ F(x,y,z) = (x+y+z,\ x+y,\ x)$
+\item $U = V = \R^3$, $\ F(x,y,z) = (x+y,\ x+y,\ x+2y-z)$
+\item $U = \R^3$, $V = \R^2$, $\ F(x,y,z) = (x-y+z,\ x+y-z)$
+\end{enumerate}
+\end{exercise}
+
+\begin{exercise}
+Find the matrices of the linear mappings from Exercise~\ref{ex:ker-im} in the following bases of the
+spaces $U$ and $V$, respectively:
+\begin{enumerate}[label=(\alph*)]
+\item the standard bases of unit vectors
+\item $\big((1,1,1),(1,1,0),(1,0,0)\big)$ and $\big((1,0,0),(1,1,0),(1,1,1)\big)$
+\item $\big((1,1,1),(1,0,0),(0,0,1)\big)$ and $\big((1,2),(3,3)\big)$
+\end{enumerate}
+\end{exercise}
+
+\begin{exercise}
+Find a formula and the matrix in the standard basis for the linear operator $F$ such that:
+\begin{enumerate}[label=(\alph*)]
+\item $F(1,1,1) = (1,0,1)$, $\ F(1,1,0) = F(0,1,1) = (1,1,1)$
+\item $F(1,2,1) = (1,0,0)$, $\ F(1,0,1) = (0,1,0)$, $\ F(1,0,0) = (1,0,0)$
+\item $F(1,0,0,0) = F(0,1,0,0) = F(0,0,1,0) = F(0,0,0,1) = (1,1,1,1)$
+\end{enumerate}
+\end{exercise}
+
+\begin{exercise}\label{ex:matrix-bases}
+Assuming that $A = M_S(F)$ is the matrix of a linear operator $F$ in the basis $S$, find the matrix
+$B = M_R(F)$ of $F$ in the basis $R$:
+\begin{enumerate}[label=(\alph*)]
+\item $\left( \begin{array}{cc} 1 & 1\\ 1 & 2 \end{array} \right)$, for $S = \big((1,1),(1,2)\big)$ and
+$R = \big((1,0),(0,1)\big)$
+\item $\left( \begin{array}{ccc} 1 & 0 & 0\\ 0 & 1 & 0\\ 0 & 0 & 1 \end{array} \right)$, for
+$S = \big((1,1,1),(0,1,2),(1,0,1)\big)$ and $R = \big((1,0,0),(0,1,0),(0,0,1)\big)$
+\item $\left( \begin{array}{ccc} 1 & 2 & 2\\ 1 & 1 & 1\\ 2 & 0 & 0 \end{array} \right)$, for
+$S = \big((1,1,1),(0,1,2),(1,0,1)\big)$ and $R = \big((1,0,0),(0,1,0),(0,0,1)\big)$
+\item $\left( \begin{array}{cccc} 1 & 1 & 1 & 1\\ 0 & 1 & 1 & 1\\ 0 & 0 & 1 & 1\\ 0 & 0 & 0 & 1
+\end{array} \right)$, for $S = \big((1,0,1,0),(0,0,1,1),(1,1,0,0),(1,0,1,1)\big)$ and\\
+$R = \big((1,1,1,0),(1,1,0,1),(1,0,1,1),(0,1,1,1)\big)$
+\end{enumerate}
+\end{exercise}
+
+\begin{exercise}
+For each pair of matrices $A$ and $B$ from Exercise~\ref{ex:matrix-bases}, find a matrix $P$ such that
+$A = P^{-1}\cdot B\cdot P$. Verify your solution by matrix multiplication.
+\end{exercise}

@@ -1,0 +1,76 @@
+% Shared preamble for the standalone exercise sheets.
+% Mirrors the notation and the "exercise" box style of ../LinearAlgebra.tex so students see the
+% same conventions both in the book and in these individually downloadable sheets.
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amsthm,mathtools}
+\usepackage[lining,semibold]{libertine}
+\usepackage[scaled=0.85]{beramono}
+\let\openbox\relax
+\let\Bbbk\relax
+\usepackage[libertine,vvarbb]{newtxmath}
+\let\Bbbk\relax
+\usepackage{amssymb}
+\usepackage[english]{babel}
+\usepackage{microtype}
+\usepackage{array}
+\usepackage[inline]{enumitem}
+\usepackage{multicol}
+\setlength{\multicolsep}{4pt plus 2pt}
+\setlist{itemsep=2pt,parsep=2pt,topsep=4pt}
+\usepackage{xcolor}
+\usepackage[most]{tcolorbox}
+\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage[colorlinks=true,linkcolor=teal!55!black]{hyperref}
+
+\definecolor{exercaccent}{HTML}{D84315}
+\definecolor{titleaccent}{HTML}{1F4E79}
+
+\setkomafont{disposition}{\normalfont\sffamily\bfseries}
+
+\theoremstyle{definition}
+\newtheorem{exercise}{Exercise}
+
+\tcolorboxenvironment{exercise}{
+  blanker, breakable,
+  before skip=10pt, after skip=10pt,
+  borderline west={2.5pt}{0pt}{exercaccent},
+  left=10pt, top=2pt, bottom=2pt
+}
+
+% --- Math macros (same as ../LinearAlgebra.tex) ---
+\newcommand{\K}{\mathbb{K}}
+\newcommand{\R}{\mathbb{R}}
+\let\C\relax
+\newcommand{\C}{\mathbb{C}}
+\let\N\relax
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Q}{\mathbb{Q}}
+\let\Z\relax
+\newcommand{\Z}{\mathbb{Z}}
+\let\V\relax
+\newcommand{\V}{\mathbf{V}}
+\let\W\relax
+\newcommand{\W}{\mathbf{W}}
+\let\vv\relax
+\newcommand{\vv}{\mathbf{v}}
+\let\uu\relax
+\newcommand{\uu}{\mathbf{u}}
+\let\ww\relax
+\newcommand{\ww}{\mathbf{w}}
+\newcommand{\0}{\mathbf{0}}
+\DeclareMathOperator{\spanop}{span}
+\newcommand{\Span}[1]{\operatorname{span}\!\left(#1\right)}
+\DeclareMathOperator{\rank}{r}
+\renewcommand{\Re}{\mathfrak{Re}}
+\renewcommand{\Im}{\mathfrak{Im}}
+\let\det\relax
+\DeclareMathOperator{\det}{det}
+
+\newcommand{\sheettitle}[1]{%
+  \begin{center}
+    {\sffamily\bfseries\Large\color{titleaccent} Linear Algebra --- Exercises}\\[2pt]
+    {\sffamily\large #1}
+  \end{center}
+  \vspace{4pt}
+}

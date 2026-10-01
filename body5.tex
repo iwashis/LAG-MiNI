@@ -50,6 +50,10 @@ Standard examples of linear mappings include rotation by a fixed angle and scali
 For any linear mapping $F\colon \V\to \W$ we have $F(\0) = \0$.
 \end{theorem}
 
+\begin{proof}
+$F(\0) = F(\0+\0) = F(\0)+F(\0)$, and adding $-F(\0)$ to both sides gives $\0 = F(\0)$.
+\end{proof}
+
 \begin{theorem}
 A mapping $F\colon \V\to \W$ is linear if and only if
 \[
@@ -73,6 +77,17 @@ The mapping $f\colon\R^3\to \R^2$ given by $f(x,y,z) = (x+y,\,2z+1)$ is \emph{no
 $f(0,0,0)=(0,1)\neq (0,0)$. The mapping $g(x,y,z) = (x^2,\,y)$ is not linear either, even though
 $g(0,0,0)=(0,0)$: we have $g(2,0,0) = (4,0)$, whereas $2\cdot g(1,0,0) = (2,0)$.
 \end{warning}
+
+\begin{example}[Differentiation is linear]
+Linear mappings need not involve tuples of numbers. On the vector space $\R_n[x]$ of polynomials of degree
+at most $n$, the differentiation map
+\[
+D\colon \R_n[x]\to\R_n[x], \qquad D(f) = f',
+\]
+is linear, since $(f+g)' = f'+g'$ and $(\lambda f)' = \lambda\cdot f'$. The same is true of many other
+operations of calculus — integration over a fixed interval, evaluation at a fixed point — which is why
+linear algebra is the natural language of so much of analysis.
+\end{example}
 
 \section{Linear mappings and matrices}
 
@@ -260,6 +275,14 @@ The kernel consists of the solutions of $x+y = 0$, $z-x = 0$, so
 Since $\rank M(F) = 2$, the image is a $2$-dimensional subspace of $\R^2$, i.e.\
 $\operatorname{im}(F) = \R^2$ and $F$ is surjective. The rank--nullity theorem confirms the count:
 $1 + 2 = 3 = \dim(\R^3)$.
+\end{example}
+
+\begin{example}[Kernel and image of differentiation]
+For the differentiation map $D\colon\R_n[x]\to\R_n[x]$ with $n\geq 1$: the kernel consists of the
+polynomials with zero derivative, i.e.\ the constants, so $\dim\ker(D) = 1$. The image consists of exactly
+the polynomials of degree at most $n-1$ (every such polynomial is the derivative of one of its
+antiderivatives, which again lies in $\R_n[x]$), so $\dim\operatorname{im}(D) = n$. The rank--nullity
+theorem checks out: $1+n = n+1 = \dim(\R_n[x])$.
 \end{example}
 
 \begin{fact}

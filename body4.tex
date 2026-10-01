@@ -48,6 +48,13 @@ a_{11} a_{22} a_{33} + a_{12} a_{23} a_{31}+a_{13} a_{21} a_{32}
 \end{aligned}
 \]
 
+\begin{remark}
+The $3\times 3$ formula is known as the \emph{rule of Sarrus}: copy the first two columns to the right of
+the matrix; the three ``descending'' diagonal products are added and the three ``ascending'' ones
+subtracted. Beware: the rule has \emph{no} analogue for $n\geq 4$ — larger determinants are computed by
+the Laplace expansion defined below or, more efficiently, by row reduction.
+\end{remark}
+
 \begin{example}
 \[
 \left| \begin{array}{cc} 1 & 2\\ 3 & 4 \end{array} \right| = 1\cdot 4 - 2\cdot 3 = -2,
@@ -74,9 +81,12 @@ This formula is the \emph{Laplace expansion along the $j$-th column}. In particu
 \end{definition}
 
 \begin{remark}
-Since $\det(A) = \det(A^T)$ (see the properties below), the determinant may equally well be expanded
-along any fixed \emph{row}: $\det(A) = \sum_{j=1}^{n} (-1)^{i+j} a_{ij}\cdot\det(A_{ij})$ for any fixed
-row index $i$. In practice one expands along the row or column containing the most zeros.
+It is a non-trivial fact, which we accept without proof, that the result does not depend on the chosen
+column $j$ — so the recursive definition is consistent, and for sizes $2$ and $3$ it reproduces the
+explicit formulas above. Moreover, since $\det(A) = \det(A^T)$ (see the properties below), the determinant
+may equally well be expanded along any fixed \emph{row}:
+$\det(A) = \sum_{j=1}^{n} (-1)^{i+j} a_{ij}\cdot\det(A_{ij})$ for any fixed row index $i$. In practice one
+expands along the row or column containing the most zeros.
 \end{remark}
 
 \begin{example}
@@ -362,3 +372,27 @@ $\det(A) = ad-bc \neq 0$. Then
 A^{-1} = \frac{1}{ad-bc}\cdot \left( \begin{array}{cc} d & -b \\ -c & a \end{array} \right ).
 \]
 \end{fact}
+
+\section{Summary: invertibility criteria}
+
+The chapters so far have produced a remarkable list of ways of saying the same thing. It deserves to be
+collected in one place.
+
+\begin{theorem}[The invertible matrix theorem]
+For a square matrix $A$ of size $n\times n$ over a field $\K$ the following conditions are equivalent:
+\begin{enumerate}
+\item $A$ is invertible;
+\item $\det(A)\neq 0$;
+\item $\rank(A) = n$;
+\item the rows of $A$ (equivalently, the columns of $A$) are linearly independent, i.e.\ they form a basis
+of $\K^n$;
+\item the homogeneous system $AX = \0$ has only the trivial solution;
+\item for every $B\in\K^n$ the system $AX = B$ has exactly one solution, namely $X = A^{-1}B$.
+\end{enumerate}
+\end{theorem}
+
+\begin{remark}
+Each chapter has added a line to this list, and Chapter~\ref{ch:eigen} will add one more: \emph{$0$ is not
+an eigenvalue of $A$}. Checking any one of these conditions checks them all — this versatility is what
+makes the determinant test so ubiquitous in algorithms.
+\end{remark}

@@ -116,6 +116,17 @@ $A \bigtriangleup A = \emptyset$. Identifying a subset $A\subseteq \{1,\ldots,n\
 bit vector, $\bigtriangleup$ becomes the bitwise XOR of bit strings.
 \end{example}
 
+\begin{example}[Roots of unity]
+For a fixed $n$, the $n$-th roots of unity from Chapter~\ref{ch:complex},
+\[
+U_n = \left\{\cos\tfrac{2k\pi}{n} + i \sin\tfrac{2k\pi}{n} \;\middle|\; k = 0,1,\ldots,n-1\right\}\subseteq\C,
+\]
+form an abelian group under multiplication of complex numbers: multiplying two roots of unity adds their
+arguments, which produces again a multiple of $\tfrac{2\pi}{n}$. The identity is $1$, and the inverse of a
+root is its conjugate. Since multiplying the roots amounts to adding the exponents $k$ modulo $n$, the
+group $U_n$ is the group $(\Z_n,+_n)$ in disguise.
+\end{example}
+
 \begin{fact}
 In any group $G$ the identity element is unique, and each element has a unique inverse.
 \end{fact}
@@ -163,9 +174,31 @@ $(\K\setminus\{0\},\cdot)$ form an abelian group with identity $1$, and multipli
 addition.
 \end{remark}
 
+\begin{remark}[Subtraction and division]
+In any field we write $a-b$ for $a+(-b)$, and $\tfrac{a}{b}$ (or $a/b$) for $a\cdot \tfrac1b$ whenever
+$b\neq 0$. Thus all four arithmetic operations make sense in any field, and — as the next fact begins to
+show — they obey the computational rules familiar from $\Q$ and $\R$.
+\end{remark}
+
 \begin{example}
 $\Q$, $\R$ and $\C$, each with their usual addition and multiplication, are fields.
 \end{example}
+
+\begin{fact}[Elementary consequences of the field axioms]
+In any field $\K$, for all $a,b\in\K$:
+\begin{itemize}
+\item $a\cdot 0 = 0$;
+\item $(-1)\cdot a = -a$;
+\item if $a\cdot b = 0$, then $a=0$ or $b=0$ \ (a field has \emph{no zero divisors}).
+\end{itemize}
+\end{fact}
+
+\begin{proof}
+First, $a\cdot 0 = a\cdot(0+0) = a\cdot 0 + a\cdot 0$, and adding $-(a\cdot 0)$ to both sides gives
+$0 = a\cdot 0$. Second, $a + (-1)\cdot a = 1\cdot a + (-1)\cdot a = \big(1+(-1)\big)\cdot a = 0\cdot a = 0$,
+so $(-1)\cdot a$ is the additive inverse of $a$. Third, if $a\cdot b = 0$ and $a\neq 0$, then multiplying by
+$\tfrac1a$ gives $b = \tfrac1a\cdot(a\cdot b) = \tfrac1a\cdot 0 = 0$.
+\end{proof}
 
 \begin{example}
 Consider the set $\Z_2=\{0,1\}$ with addition and multiplication given by
@@ -181,7 +214,8 @@ Then $\Z_2$ with these operations is a field (the smallest one).
 More generally, consider $\Z_n$ with addition and multiplication modulo $n$.
 \begin{itemize}
 \item $\Z_4$ is \emph{not} a field: the products $2\cdot 0 = 0$, $2\cdot 1 = 2$, $2\cdot 2 = 0$ and
-$2\cdot 3 = 2$ (all modulo $4$) never equal $1$, so the element $2$ has no multiplicative inverse.
+$2\cdot 3 = 2$ (all modulo $4$) never equal $1$, so the element $2$ has no multiplicative inverse. Note
+that $\Z_4$ also violates the no-zero-divisors property: $2\cdot_4 2 = 0$ although $2\neq 0$.
 \item $\Z_5$ \emph{is} a field: modulo $5$ we have $1\cdot 1 = 1$, $2\cdot 3 = 1$ and $4\cdot 4 = 1$, so
 every non-zero element has an inverse.
 \end{itemize}
@@ -190,6 +224,28 @@ every non-zero element has an inverse.
 \begin{theorem}
 $\Z_n$, with addition and multiplication modulo $n$, is a field if and only if $n$ is a prime number.
 \end{theorem}
+
+\begin{proof}
+Suppose first that $n$ is composite, say $n = a\cdot b$ with $1<a,b<n$. Then $a\cdot_n b = 0$ although
+$a\neq 0$ and $b\neq 0$, so $\Z_n$ has zero divisors and cannot be a field.
+
+Conversely, let $n=p$ be prime and take any $a\in\{1,\ldots,p-1\}$; we must produce an inverse of $a$.
+Consider the $p-1$ products
+\[
+a\cdot_p 1,\quad a\cdot_p 2,\quad \ldots,\quad a\cdot_p (p-1).
+\]
+None of them equals $0$, since a product of two integers not divisible by the prime $p$ is not divisible by
+$p$. Moreover no two of them are equal: $a\cdot_p x = a\cdot_p y$ means that $p$ divides $a(x-y)$, hence
+$p$ divides $x-y$, hence $x=y$. So the $p-1$ products are distinct elements of $\{1,\ldots,p-1\}$ — and
+therefore run through \emph{all} of $\{1,\ldots,p-1\}$. In particular $a\cdot_p x = 1$ for some $x$, which
+is the required inverse.
+\end{proof}
+
+\begin{remark}
+The proof is non-constructive: it shows an inverse exists without saying how to find it efficiently. In
+practice inverses modulo $p$ are computed with the \emph{extended Euclidean algorithm} — a staple of every
+cryptographic library.
+\end{remark}
 
 \begin{example}[A field between $\Q$ and $\R$]
 The set

@@ -1,0 +1,90 @@
+\begin{exercise}
+Let $n$ be a fixed positive integer and let $a$ and $b$ be any two integers. Recall that $a$ is congruent
+to $b$ modulo $n$ if $n$ divides $a-b$. Calculate:
+\begin{enumerate*}[label=\alph*), itemjoin={\qquad}]
+\item $17 \bmod 4$
+\item $4 \bmod 17$
+\item $(-2) \bmod 5$
+\end{enumerate*}
+\end{exercise}
+
+\begin{exercise}
+Solve the equations:
+\begin{enumerate}[label=\alph*)]
+\item $2x \equiv 1 \pmod 7$
+\item $2x \equiv 1 \pmod 6$
+\item $5x \equiv 1 \pmod 9$
+\item $x^2 \equiv 3 \pmod{11}$
+\item $2x+3 \equiv 0 \pmod 5$
+\item $x+k \equiv 0 \pmod n$
+\end{enumerate}
+\end{exercise}
+
+\begin{exercise}[$\ast$]
+Prove that for all $n,k,p\in \Z$ we have the following:
+\begin{enumerate}[label=\alph*)]
+\item $(n \bmod k) \bmod k = n \bmod k$
+\item $(n+p) \bmod k = \big((n \bmod k) + (p \bmod k)\big) \bmod k$
+\item $(np) \bmod k = \big((n \bmod k)\,(p \bmod k)\big) \bmod k$
+\end{enumerate}
+\end{exercise}
+
+\begin{exercise}
+Recall that for $a,b\in\N$ the operations of addition and multiplication modulo $n$ are defined by
+$a +_n b = (a+b) \bmod n$ and $a \cdot_n b = (a\cdot b) \bmod n$. Prove that:
+\begin{enumerate}[label=\alph*)]
+\item addition modulo $n$ is associative, i.e.\ $(a +_n b) +_n c = a +_n (b +_n c)$ for any $a,b,c\in\N$;
+\item multiplication modulo $n$ is associative, i.e.\ $(a \cdot_n b) \cdot_n c = a \cdot_n (b \cdot_n c)$
+for any $a,b,c\in\N$;
+\item multiplication modulo $n$ is distributive with respect to addition modulo $n$, i.e.\
+$(a +_n b) \cdot_n c = (a \cdot_n c) +_n (b \cdot_n c)$ for any $a,b,c\in\N$.
+\end{enumerate}
+\end{exercise}
+
+\begin{exercise}
+State which of the following are groups:
+\begin{enumerate*}[label=\alph*), itemjoin={\qquad}]
+\item $(\Z_n, +_n)$
+\item $(\Z_n\setminus\{0\}, \cdot_n)$
+\item $(\{1,2,3,4,6,12\}, \gcd)$
+\end{enumerate*}
+\end{exercise}
+
+\begin{exercise}[$\ast$]
+Show that $(2^X, \bigtriangleup)$ is a group, where $\bigtriangleup$ denotes the symmetric difference.
+Construct the group table of $(2^{\{a,b,c\}}, \bigtriangleup)$.
+\end{exercise}
+
+\begin{exercise}
+Show that $(\Z_n\setminus\{0\}, \cdot_n)$ is a group if and only if $n$ is a prime number.
+\end{exercise}
+
+\begin{exercise}
+Verify whether $(\R_+, \bullet)$ is a group, where $a\bullet b = a^2 b^2$.
+\end{exercise}
+
+\begin{exercise}
+Let $p\in\N$ be a prime number. Show that $(\Z_p, +_p, \cdot_p)$ is a field.
+\end{exercise}
+
+\begin{exercise}
+Determine which of the following structures are fields. Do this in two steps: first verify whether the
+set is a group with respect to the first operation, and then whether the set without the identity element
+of the first operation is a group with respect to the second operation. Here $2^X$ carries the operations
+$\cup$, $\cap$ and the symmetric difference $\bigtriangleup$, while $\R^\R$ denotes the set of all
+functions $\R\to\R$, with pointwise addition $+$ and composition $\circ$.
+\begin{enumerate*}[label=\alph*), itemjoin={\qquad}]
+\item $(2^X, \cup, \cap)$
+\item $(\R^\R, +, \circ)$
+\item $(2^X, \cap, \cup)$
+\item $(\R^\R, \circ, +)$
+\item $(2^X, \cap, \bigtriangleup)$
+\item $(2^X, \bigtriangleup, \cap)$
+\item $(2^X, \cup, \bigtriangleup)$
+\item $(2^X, \bigtriangleup, \cup)$
+\end{enumerate*}
+\end{exercise}
+
+\begin{exercise}
+Verify whether $(\R, \oplus, \odot)$ is a field, where $a \oplus b = a+b+1$ and $a\odot b = ab+a+b$.
+\end{exercise}

@@ -51,6 +51,14 @@ A \emph{complex number} is an expression $a+bi$, where $a,b\in \R$. The set of a
 by $\C$.
 \end{definition}
 
+\begin{remark}
+Formally, a complex number is simply an ordered pair $(a,b)\in\R\times\R$, and $a+bi$ is a convenient
+notation for that pair: $a$ stands for $(a,0)$, the symbol $i$ denotes the pair $(0,1)$, and real numbers
+are identified with the pairs $(a,0)$. There is nothing to ``imagine'': $\C$ is the plane $\R^2$ equipped
+with the multiplication defined below. Two complex numbers are equal exactly when both their real parts and
+their imaginary parts agree.
+\end{remark}
+
 \begin{definition}
 Addition and multiplication of complex numbers are defined by
 \[
@@ -98,7 +106,7 @@ Multiplying numerator and denominator by the conjugate $a-bi$,
 \begin{example}
 \[
 \frac{1}{i} = \frac{-i}{i\cdot(-i)} = \frac{-i}{1} = -i, \qquad
-\frac{1}{1+i} = \frac{1-i}{(1+i)(1-i)} = \frac{1-i}{2} =\tfrac12 + \tfrac12 i.
+\frac{1}{1+i} = \frac{1-i}{(1+i)(1-i)} = \frac{1-i}{2} =\tfrac12 - \tfrac12\, i.
 \]
 \end{example}
 
@@ -130,12 +138,12 @@ $z\cdot\bar z = (3-4i)(3+4i) = 9+16 = 25 = |z|^2$.
 \end{example}
 
 \begin{fact}[Properties]
-For complex numbers $z,z_1$,
+For complex numbers $z,w$,
 \[
 z\cdot \bar{z} = |z|^2, \qquad |z| = \sqrt{z\cdot \bar{z}}, \qquad
 \Re(z) = \tfrac12 (z+\bar{z}), \qquad \Im(z) = \tfrac{1}{2i} (z-\bar{z}),
 \]
-and $|z-z_1|$ is the distance between the points $z$ and $z_1$.
+and $|z-w|$ is the distance between the points $z$ and $w$.
 \end{fact}
 
 \begin{fact}[Algebra of conjugates and moduli]
@@ -144,6 +152,15 @@ For all $z,w\in\C$:
 \overline{z+w} = \bar z + \bar w, \qquad \overline{z\cdot w} = \bar z \cdot \bar w, \qquad \bar{\bar z} = z,
 \qquad |z\cdot w| = |z|\,|w|, \qquad \left| \frac{z}{w} \right| = \frac{|z|}{|w|} \quad (w\neq 0).
 \]
+\end{fact}
+
+\begin{fact}[Triangle inequality]
+For all $z,w\in\C$,
+\[
+|z+w| \;\leq\; |z| + |w|,
+\]
+with equality exactly when one of $z,w$ is a non-negative real multiple of the other. Geometrically: in the
+triangle with vertices $0$, $z$ and $z+w$, no side is longer than the sum of the other two.
 \end{fact}
 
 \begin{example}[Geometric loci]
@@ -181,19 +198,24 @@ and its \emph{argument} $\varphi$ is the angle the vector makes with the positiv
 \section{Polar form and De Moivre's formula}
 
 \begin{definition}
-Instead of Cartesian coordinates, a complex number $z=a+bi$ may be described by \emph{polar coordinates}: its
-\emph{modulus} $|z|=\sqrt{a^2+b^2}$ and its \emph{argument} (or \emph{phase}) $\arg(z)$.
+Let $z=a+bi$ be a non-zero complex number. An \emph{argument} of $z$ (also called its \emph{phase}), denoted
+$\arg(z)$, is any angle $\varphi\in\R$ satisfying
+\[
+\cos\varphi = \frac{a}{|z|}, \qquad \sin\varphi = \frac{b}{|z|}.
+\]
+Geometrically, $\varphi$ is the angle between the positive real axis and the vector $z$. For $z=0$ the
+quotients above are undefined, and we adopt the convention $\arg(0)=0$. The pair $\big(|z|,\arg(z)\big)$
+describes $z$ in \emph{polar coordinates}, as opposed to the Cartesian coordinates $(a,b)$.
 \end{definition}
 
 \begin{theorem}[Polar form]
-Let $z=a+bi$ have modulus $|z|$ and argument $\varphi=\arg(z)$. Then
+Every complex number $z=a+bi$ can be written as
 \[
-a = |z|\cos\varphi, \qquad b = |z|\sin\varphi,
+z=|z|\left(\cos \varphi + i\sin \varphi \right), \qquad \varphi = \arg(z),
 \]
-and conversely $|z| = \sqrt{a^2+b^2}$, while $\varphi$ may be found from $\tan\varphi= \tfrac{b}{a}$. Hence
-\[
-z=|z|\left(\cos \varphi + i\sin \varphi \right).
-\]
+since $a = |z|\cos\varphi$ and $b = |z|\sin\varphi$ (for $z=0$ both sides vanish, whatever the angle).
+Conversely, $|z| = \sqrt{a^2+b^2}$, while for $z\neq 0$ the argument $\varphi$ may be found from the equation
+$\tan\varphi= \tfrac{b}{a}$ (for $a \neq 0$) together with the quadrant in which the point $(a,b)$ lies.
 \end{theorem}
 
 \begin{warning}
@@ -229,6 +251,14 @@ z_1 z_2 = |z_1|\,|z_2|\,\big(\cos (\varphi_1+\varphi_2) + i\sin(\varphi_1+\varph
 That is, multiplication multiplies the moduli and adds the arguments.
 \end{theorem}
 
+\begin{remark}[Multiplication is rotation and scaling]
+The theorem has a geometric reading worth memorising: multiplying by $z = |z|(\cos\varphi+i\sin\varphi)$
+rotates the plane by the angle $\varphi$ and scales it by the factor $|z|$. In particular, multiplication by
+a number of modulus $1$ is a pure rotation — this is the fact behind the use of complex numbers (and, one
+dimension up, quaternions) in computer graphics — and multiplication by $i$ is the rotation by $90^\circ$:
+one checks directly that $i\cdot(a+bi) = -b+ai$.
+\end{remark}
+
 \begin{theorem}[De Moivre's formula]
 Set $z^0 = 1$ and $z^n = z^{n-1}\cdot z$. If $z=|z|(\cos \varphi + i\sin\varphi)$ and $n\in \N$, then
 \[
@@ -259,6 +289,18 @@ Comparing real and imaginary parts of both sides yields both triple-angle formul
 The same method expresses $\cos n\alpha$ and $\sin n\alpha$ in terms of $\cos\alpha$ and $\sin\alpha$ for
 any $n\in\N$.
 \end{example}
+
+\begin{remark}[Exponential notation]
+In mathematical analysis one proves \emph{Euler's formula} $e^{i\varphi} = \cos\varphi + i\sin\varphi$, which
+turns the polar form into the compact expression $z = |z|\,e^{i\varphi}$. The multiplication rule and
+De Moivre's formula then become instances of the ordinary laws of exponents:
+\[
+|z_1|e^{i\varphi_1}\cdot |z_2|e^{i\varphi_2} = |z_1||z_2|\,e^{i(\varphi_1+\varphi_2)}, \qquad
+\big(|z|e^{i\varphi}\big)^n = |z|^n e^{in\varphi}.
+\]
+We will not rely on this notation in these notes, but it is ubiquitous in engineering, physics and signal
+processing, and it is the form in which the Fast Fourier Transform is usually written.
+\end{remark}
 
 \section{Roots of complex numbers}
 
@@ -384,6 +426,23 @@ over $\C$ since $x^2+1 = (x-i)(x+i)$.
 
 An element $a\in \K$ is a \emph{root} of $f\in \K[x]$ if $f(a)=0$.
 
+\begin{theorem}[Bézout's root--factor theorem]
+Let $f\in\K[x]$ and $a\in\K$. Then $a$ is a root of $f$ if and only if $x-a$ divides $f$, i.e.\
+\[
+f(a) = 0 \iff f(x) = q(x)\,(x-a) \ \text{ for some } q\in\K[x].
+\]
+\end{theorem}
+
+\begin{proof}
+Division with remainder by $g(x)=x-a$ gives $f(x) = q(x)(x-a)+r$ with $\deg(r)<1$, so $r$ is a constant.
+Substituting $x=a$ yields $r = f(a)$. Hence $f(a)=0$ if and only if $r = 0$, i.e.\ if and only if
+$f(x)=q(x)(x-a)$.
+\end{proof}
+
+\begin{corollary}
+A non-zero polynomial of degree $n$ over a field has at most $n$ roots.
+\end{corollary}
+
 \begin{theorem}[Fundamental Theorem of Algebra]
 Any polynomial $f\in \C[x]$ of degree $\deg(f)\geq 1$ has a root in $\C$.
 \end{theorem}
@@ -431,7 +490,9 @@ f(z)=0 \implies f(\bar{z})=0.
 
 \begin{corollary}
 The irreducible polynomials of positive degree over $\R$ are exactly the polynomials of degree $1$ and the
-polynomials of degree $2$ with $\Delta = b^2-4ac<0$.
+polynomials of degree $2$ with $\Delta = b^2-4ac<0$. Consequently, every polynomial $f\in\R[x]$ of positive
+degree factors into a product of real linear factors and real quadratic factors with negative discriminant
+(the latter pairing up the conjugate non-real roots of $f$).
 \end{corollary}
 
 \begin{example}
