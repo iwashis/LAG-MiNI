@@ -60,3 +60,8 @@ Or directly:
 ```bash
 latexmk -pdf LinearAlgebra.tex
 ```
+
+## Acknowledgements
+
+This booklet is the result of work by multiple people at the faculty, among them
+prof. Agata Pilitowska, who co-authored the tutorial series the exercises are drawn from.
