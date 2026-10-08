@@ -19,7 +19,7 @@ faces this way.
 \item \textbf{Repeated processes.} Whatever evolves in discrete steps by a fixed linear rule — a Markov
 chain, a population model, the pair of previous terms in the Fibonacci recurrence — evolves by matrix
 powers $A^k$. Eigenvalues make such powers computable in closed form (see the section on diagonalisation),
-and the largest eigenvalue governs the long-run fate of the process: growth, decay or convergence to a
+and the eigenvalue of largest absolute value governs the long-run fate of the process: growth, decay or convergence to a
 steady state. In essence this is also why eigenvalues decide the stability of physical systems, and why
 they appear when engineers ask whether a bridge will resonate in the wind.
 \item \textbf{Graphs and clustering.} The eigenvalues of matrices associated with a graph reveal its
@@ -261,8 +261,8 @@ eigenvectors, then the set $\{\vv_1,\ldots,\vv_k\}$ is linearly independent.
 \section{Geometric interpretation}
 
 Eigenvectors of a matrix $A$ are the directions left unchanged (up to scaling) by the linear mapping
-$\vv\mapsto A\vv$. The figure below illustrates the action of a shear mapping: the horizontal vector is an
-eigenvector (its direction is preserved), whereas the other vector changes direction.
+$\vv\mapsto A\vv$. The figure below illustrates an eigenvector $\mathbf{x}$: the mapping only stretches it to
+$\lambda\mathbf{x}$, keeping its direction.
 
 \begin{center}
 \includegraphics[scale=0.8]{Eigenvectors.png}
@@ -513,7 +513,7 @@ Both failure modes are cured by one modification of the model: with a small prob
 bored and, instead of following a link, jumps to a completely random page.
 
 \begin{definition}[Google matrix]
-Let $\alpha$ be the \emph{damping factor} (e.g.\ $\alpha=0.85$) and let $v$ be a \emph{personalisation
+Let $0<\alpha<1$ be the \emph{damping factor} (e.g.\ $\alpha=0.85$) and let $v$ be a \emph{personalisation
 vector}: a probability vector describing where the surfer jumps when bored (for the uniform choice,
 $v = (\tfrac1n,\ldots,\tfrac1n)$). Put
 \[
@@ -528,7 +528,7 @@ that $G$ is again a stochastic matrix: its entries are non-negative and
 G\cdot (1,\ldots,1)^T = \alpha\, S (1,\ldots,1)^T + (1-\alpha)(1,\ldots,1)^T \big(v^T (1,\ldots,1)^T\big)
 = \alpha (1,\ldots,1)^T + (1-\alpha)(1,\ldots,1)^T = (1,\ldots,1)^T,
 \]
-since the entries of $v$ sum to $1$. Unlike $S$, however, all entries of $G$ are strictly positive — every
+since the entries of $v$ sum to $1$. Unlike $S$, however, when $v$ has positive entries (e.g.\ the uniform choice) all entries of $G$ are strictly positive — every
 page can reach every other page in one step — and this is exactly what guarantees a unique answer.
 
 \begin{fact}
@@ -633,7 +633,7 @@ embeddings the vector arithmetic of Chapter~\ref{ch:vector-spaces} captures anal
 \[
 \text{\itshape king} - \text{\itshape man} + \text{\itshape woman} \approx \text{\itshape queen}
 \]
-holds literally, as an equation between vectors. An embedding of a vocabulary of $50\,000$ words into
+holds approximately: the word vector nearest to the left-hand side is that of \emph{queen}. An embedding of a vocabulary of $50\,000$ words into
 $\R^{768}$ is nothing but a $50\,000\times 768$ matrix, learned from data, whose rows are the word
 vectors.
 
@@ -705,7 +705,7 @@ following fact (a form of the \emph{spectral theorem}, proved in a second course
 matrices the best-behaved matrices of all.
 
 \begin{fact}
-A symmetric matrix $C\in\R^d_d$ has $d$ real eigenvalues (with multiplicities), and $\R^d$ has a basis
+A symmetric real $d\times d$ matrix $C$ has $d$ real eigenvalues (with multiplicities), and $\R^d$ has a basis
 consisting of eigenvectors of $C$. In particular, every symmetric real matrix is diagonalisable.
 \end{fact}
 

@@ -161,7 +161,7 @@ following conditions.
 \item there is an element $0\in \K$ such that $a+0=0+a=a$ for any $a\in \K$;
 \item for any $a\in \K$ there exists $-a\in \K$ such that $a+(-a)=(-a)+a=0$;
 \item for any $a,b,c\in \K$, $\ a\cdot b = b\cdot a\ $ and $\ a\cdot(b\cdot c)=(a\cdot b)\cdot c$;
-\item there is an element $1\in \K$ such that $a\cdot 1=1\cdot a=a$ for any $a\in \K$;
+\item there is an element $1\in \K$, $1\neq 0$, such that $a\cdot 1=1\cdot a=a$ for any $a\in \K$;
 \item for any $a\in \K$ with $a\neq 0$ there is $\tfrac{1}{a}\in \K$ such that
 $a \cdot \tfrac{1}{a} = \tfrac{1}{a}\cdot a = 1$;
 \item for any $a,b,c\in \K$, $\ (a+b)\cdot c = a\cdot c + b\cdot c$.
@@ -226,7 +226,7 @@ $\Z_n$, with addition and multiplication modulo $n$, is a field if and only if $
 \end{theorem}
 
 \begin{proof}
-Suppose first that $n$ is composite, say $n = a\cdot b$ with $1<a,b<n$. Then $a\cdot_n b = 0$ although
+For $n=1$ we have $\Z_1=\{0\}$, so $1=0$ and $\Z_1$ is not a field. Suppose next that $n$ is composite, say $n = a\cdot b$ with $1<a,b<n$. Then $a\cdot_n b = 0$ although
 $a\neq 0$ and $b\neq 0$, so $\Z_n$ has zero divisors and cannot be a field.
 
 Conversely, let $n=p$ be prime and take any $a\in\{1,\ldots,p-1\}$; we must produce an inverse of $a$.

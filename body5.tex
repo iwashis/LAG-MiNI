@@ -11,14 +11,15 @@ an astonishing amount of computing fits within that budget:
 \begin{itemize}
 \item \textbf{3D graphics.} Every frame, a game engine pushes millions of vertices through the same
 pipeline: rotate the model, place it in the world, position the camera, project onto the screen. Each
-stage is a linear mapping, and the whole pipeline is their composition — which, by a central theorem of
+stage is a linear mapping (once points are written in homogeneous coordinates, which turn translations
+and projections into matrices too), and the whole pipeline is their composition — which, by a central theorem of
 this chapter, is again a single matrix, precomputed once per frame and then applied cheaply to every
 vertex. This is why the graphics industry runs on matrix multiplication.
 \item \textbf{Neural networks.} Each layer of a neural network is a linear mapping followed by a fixed,
 very simple non-linear function. All of the network's learned knowledge is stored in the matrices of its
 linear parts.
 \item \textbf{Signals, robots, cameras.} Audio filters, the coordinate changes between a robot's joints
-and the room it stands in, and the projection performed by a camera are all linear mappings.
+and the room it stands in, and the projection performed by a camera are all linear mappings (the last two in homogeneous coordinates).
 \end{itemize}
 
 The second half of the chapter introduces the \emph{kernel} of a mapping (everything that is sent to zero)

@@ -291,7 +291,7 @@ $S\subseteq W$, then $\Span{S}\subseteq W$.
 \[
 \Span{\{x^2,x,1\}} = \Span{\{x^2,x,1,x^2+5\}} = \{ax^2+bx+c\mid a,b,c\in \R\},
 \]
-the space of quadratic functions.
+the space $\R_2[x]$ of polynomials of degree at most $2$.
 \end{itemize}
 \end{example}
 
@@ -314,7 +314,7 @@ of such systems is developed in Chapter~\ref{ch:sole}.
 
 \begin{definition}
 Let $\V$ be a vector space over a field $\K$. A set $S\subseteq \V$ of vectors is \emph{linearly independent}
-if for any $\vv_1,\ldots,\vv_n \in S$ and any $a_1,\ldots,a_n\in \K$
+if for any pairwise distinct $\vv_1,\ldots,\vv_n \in S$ and any $a_1,\ldots,a_n\in \K$
 \[
 a_1\vv_1+\ldots+a_n\vv_n = \0 \implies a_1=\ldots =a_n=0.
 \]
@@ -460,7 +460,7 @@ If $\W$ is a subspace of a vector space $\V$, then
 \end{itemize}
 \end{theorem}
 
-\begin{theorem}
+\begin{theorem}\label{thm:sets-of-size-n}
 Let $\V$ be a vector space with $\dim(\V)=n$ and let $S\subseteq \V$. Then:
 \begin{itemize}
 \item if $\Span{S}=\V$, then $|S|\geq n$;
@@ -481,5 +481,5 @@ Let $\V$ be a vector space with $\dim(\V) = n<\infty$. Then:
 \begin{example}
 The set $\{(1,1,0)\}$ is linearly independent in $\R^3$; it can be extended to a basis, e.g.\
 $\{(1,1,0),(0,1,0),(0,0,1)\}$: a quick check shows that these three vectors are linearly independent, and
-by the previous theorem three linearly independent vectors in a $3$-dimensional space form a basis.
+by Theorem~\ref{thm:sets-of-size-n} three linearly independent vectors in a $3$-dimensional space form a basis.
 \end{example}

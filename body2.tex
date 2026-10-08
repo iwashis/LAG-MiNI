@@ -13,7 +13,7 @@ flows and ranking nodes all become matrix computations (Chapter~\ref{ch:eigen} m
 Google's PageRank);
 \item a layer of a \textbf{neural network} is a matrix of weights: an input vector is multiplied by the
 matrix, a simple non-linear function is applied, and the result is passed to the next layer.
-``Training'' a network means nothing else than adjusting the entries of its matrices;
+``Training'' a network means nothing other than adjusting the entries of its matrices;
 \item a \textbf{spreadsheet}, a database table, the term--document table inside a search engine — matrices
 again.
 \end{itemize}
@@ -202,8 +202,8 @@ In particular, $A\cdot B$ and $B\cdot A$ need not even have the same size.
 \end{example}
 
 \begin{remark}[Matrix--vector products]
-An important special case is $n = 1$: the product of an $m\times n$ matrix $A$ with a column vector
-$\vv\in\K^n$ is a column vector $A\vv\in\K^m$. Writing the definition out reveals a useful reading:
+An important special case is a product whose second factor has a single column: the product of an
+$m\times n$ matrix $A$ with a column vector $\vv\in\K^n$ (an $n\times 1$ matrix) is a column vector $A\vv\in\K^m$. Writing the definition out reveals a useful reading:
 \[
 A \left(\begin{array}{c} x_1\\ \vdots\\ x_n\end{array}\right)
 = x_1\cdot \big(\text{1st column of } A\big) + \ldots + x_n\cdot \big(\text{$n$-th column of } A\big),
@@ -338,7 +338,7 @@ By \emph{elementary row operations} on a matrix $A$ we mean the following:
 \item \textbf{(Row scaling)} each element of the $i$-th row is multiplied by a \emph{nonzero} scalar
 $k\in \K$ ($kR_i\rightarrow R_i$);
 \item \textbf{(Row addition)} the $i$-th row is replaced by the sum of the $i$-th row and a multiple of the
-$j$-th row ($R_i+k\cdot R_j\rightarrow R_i$).
+$j$-th row, where $j\neq i$ ($R_i+k\cdot R_j\rightarrow R_i$).
 \end{enumerate}
 \emph{Elementary column operations} are defined analogously.
 \end{definition}

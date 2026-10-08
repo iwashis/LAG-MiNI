@@ -33,7 +33,7 @@ matrices, but for large ones the method of choice is, once again, row reduction.
 
 \section{Determinants}
 
-To every square matrix $A \in \K^n_n$ over a field $\K$ one assigns a scalar from $\K$, denoted $|A|$ or
+To every square $n\times n$ matrix $A$ over a field $\K$ one assigns a scalar from $\K$, denoted $|A|$ or
 $\det(A)$ and called \emph{the determinant of $A$}. For matrices of sizes $1\times 1$, $2\times 2$ and
 $3\times 3$ it is given by the explicit formulas
 \[
@@ -341,8 +341,8 @@ One can (and always should) verify the result by checking that $A\cdot A^{-1} = 
 \end{example}
 
 \begin{fact}[Inversion by determinants]
-Let $A$ be an invertible square matrix and let $A_{k,m}$ denote the matrix obtained from $A$ by deleting its
-$k$-th row and $m$-th column. Then
+Let $A$ be an invertible square matrix and let $A_{ij}$ denote the matrix obtained from $A$ by deleting its
+$i$-th row and $j$-th column. Then
 \[
 A^{-1} = \frac{1}{|A|}\cdot
 \left( \begin{array}{cccc}
