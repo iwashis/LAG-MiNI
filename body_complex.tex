@@ -384,24 +384,30 @@ $z_0,\ldots,z_5$: they form a regular hexagon inscribed in the unit circle.
 \section{Polynomials}
 
 \begin{definition}
-Let $\K$ be a field. A \emph{polynomial} $f$ of degree $n=:\deg(f)$ over $\K$ is an expression
+A \emph{polynomial} $f$ of degree $n=:\deg(f)$ with \emph{real coefficients} is an expression
 \[
 f(x) = a_n x^n + a_{n-1}x^{n-1}+\ldots + a_1 x + a_0,
 \]
-with $a_0,a_1,\ldots,a_n\in \K$ and $a_n\neq 0$. The set of all polynomials over $\K$ is denoted by $\K[x]$.
-The degree of the zero polynomial $0$ is taken to be $-\infty$.
+with $a_0,a_1,\ldots,a_n\in \R$ and $a_n\neq 0$. If we allow $a_0,a_1,\ldots,a_n\in\C$, we speak of a
+polynomial with \emph{complex coefficients}. The sets of all such polynomials are denoted by $\R[x]$ and
+$\C[x]$, respectively. The degree of the zero polynomial $0$ is taken to be $-\infty$.
 \end{definition}
 
+\noindent Since every real number is a complex number, $\R[x]\subseteq\C[x]$: a polynomial with real
+coefficients is a special polynomial with complex coefficients. Polynomials are added and multiplied in the
+usual way, and $f$ can be evaluated at any complex number $z$, giving $f(z)\in\C$.
+
 \begin{example}
-$x+1, \quad x^2+(2+i)x+i, \quad 2x^3+1$ are polynomials (the second over $\C$).
+$x+1$ and $2x^3+1$ belong to $\R[x]$ (and hence also to $\C[x]$), while $x^2+(2+i)x+i$ belongs to $\C[x]$
+but not to $\R[x]$.
 \end{example}
 
 \begin{fact}[Division with remainder]
-Let $f$ and $g$ be polynomials over $\K$ with $g\neq 0$. Then there exist polynomials
-$q,r\in \K[x]$ such that
+Let $f,g\in\C[x]$ with $g\neq 0$. Then there exist polynomials $q,r\in \C[x]$ such that
 \[
 f = q\cdot g + r, \qquad \deg(r)<\deg(g).
 \]
+Moreover, if $f,g\in\R[x]$, then also $q,r\in\R[x]$.
 \end{fact}
 
 \begin{example}
@@ -412,11 +418,13 @@ x^2+1 = (x-1)(x+1)+2.
 \end{example}
 
 \begin{definition}
-A polynomial $f\in \K[x]$ is \emph{reducible} if there exist $g,h\in \K[x]$ with $\deg(g)>0$, $\deg(h)>0$ and
-$f=g\cdot h$. It is \emph{irreducible} if
+A polynomial $f\in \R[x]$ is \emph{reducible over $\R$} if there exist $g,h\in \R[x]$ with $\deg(g)>0$,
+$\deg(h)>0$ and $f=g\cdot h$. It is \emph{irreducible over $\R$} if
 \[
-f = g\cdot h \implies \deg(g)=0 \ \text{ or } \ \deg(h)=0.
+f = g\cdot h \implies \deg(g)=0 \ \text{ or } \ \deg(h)=0 \qquad (g,h\in\R[x]).
 \]
+Reducibility and irreducibility \emph{over $\C$} of $f\in\C[x]$ are defined in the same way, with $\R[x]$
+replaced by $\C[x]$.
 \end{definition}
 
 \begin{example}
@@ -424,13 +432,15 @@ $x+1$ is irreducible over both $\R$ and $\C$. The polynomial $x^2+1$ is irreduci
 over $\C$ since $x^2+1 = (x-i)(x+i)$.
 \end{example}
 
-An element $a\in \K$ is a \emph{root} of $f\in \K[x]$ if $f(a)=0$.
+A complex number $a$ is a \emph{root} of $f\in \C[x]$ if $f(a)=0$. For $f\in\R[x]$ we distinguish
+\emph{real roots} ($a\in\R$) from non-real ones.
 
 \begin{theorem}[Bézout's root--factor theorem]
-Let $f\in\K[x]$ and $a\in\K$. Then $a$ is a root of $f$ if and only if $x-a$ divides $f$, i.e.\
+Let $f\in\C[x]$ and $a\in\C$. Then $a$ is a root of $f$ if and only if $x-a$ divides $f$, i.e.\
 \[
-f(a) = 0 \iff f(x) = q(x)\,(x-a) \ \text{ for some } q\in\K[x].
+f(a) = 0 \iff f(x) = q(x)\,(x-a) \ \text{ for some } q\in\C[x].
 \]
+If $f\in\R[x]$ and $a\in\R$, then $q\in\R[x]$.
 \end{theorem}
 
 \begin{proof}
@@ -440,7 +450,8 @@ $f(x)=q(x)(x-a)$.
 \end{proof}
 
 \begin{corollary}
-A non-zero polynomial of degree $n$ over a field has at most $n$ roots.
+A non-zero polynomial $f\in\C[x]$ of degree $n$ has at most $n$ roots in $\C$ (and hence, if $f\in\R[x]$,
+at most $n$ real roots).
 \end{corollary}
 
 \begin{theorem}[Fundamental Theorem of Algebra]
@@ -507,3 +518,12 @@ x^4-16 = (x-2)(x+2)(x-2i)(x+2i).
 \]
 The two non-real roots $\pm 2i$ form a conjugate pair.
 \end{example}
+
+\begin{remark}
+Nothing in division with remainder or in Bézout's theorem depends on the coefficients being real or complex
+numbers specifically: all we need is to be able to add, subtract, multiply and divide them. Once
+\emph{fields} are introduced in the next chapter, every definition and fact in this section up to and
+including the corollary to Bézout's theorem carries over word for word to polynomials $\K[x]$ with
+coefficients in any field $\K$. The Fundamental Theorem of Algebra, by contrast, is a special property of
+$\C$.
+\end{remark}
