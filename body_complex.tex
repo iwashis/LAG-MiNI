@@ -9,7 +9,7 @@ equations. The remedy is to \emph{extend} the set of real numbers: we introduce 
 \[
 i, \qquad \text{required to satisfy} \qquad i^2 = -1.
 \]
-Clearly $i$ is not a real number. As we shall see, adjoining $i$ to $\R$ produces a new field — the field of
+Clearly $i$ is not a real number. As we shall see, adjoining $i$ to $\R$ produces a new number system — the
 complex numbers — in which \emph{every} polynomial equation has a solution.
 
 So much for the algebra — but why should a computer scientist care about numbers that mathematicians
@@ -36,9 +36,9 @@ is produced by iterating the map $z\mapsto z^2+c$ over complex numbers and colou
 the modulus $|z|$ escapes to infinity.
 \end{itemize}
 
-There is also an internal reason to start the course here. The complex numbers are the cleanest example of
-a \emph{field} — the abstract structure, introduced in the next chapter, that provides the scalars for
-everything that follows: vector spaces, matrices, determinants and eigenvalues. Moreover, some purely
+There is also an internal reason to start the course here. Together with the real numbers, the complex
+numbers will provide the scalars for everything that follows: vector spaces, matrices, determinants and
+eigenvalues. Moreover, some purely
 real-looking problems of linear algebra secretly live in $\C$: in Chapter~\ref{ch:eigen} we will meet
 perfectly ordinary real matrices whose eigenvalues simply do not exist over $\R$ and force us into the
 complex plane whether we like it or not. Learning to compute in $\C$ now is a small investment with a
@@ -79,15 +79,6 @@ using $i^2=-1$.
 \]
 \end{example}
 
-\begin{fact}
-Addition and multiplication of complex numbers are both commutative and associative, and multiplication is
-distributive over addition.
-\end{fact}
-
-\begin{proof}
-A straightforward verification from the definitions.
-\end{proof}
-
 \begin{fact}[Inversion]
 For any complex number $a+bi$ we have $(a+bi)(a-bi)=a^2+b^2$. Consequently, if $z=a+bi\neq 0$, then its
 multiplicative inverse is
@@ -110,12 +101,26 @@ Multiplying numerator and denominator by the conjugate $a-bi$,
 \]
 \end{example}
 
-\begin{theorem}
-The set of complex numbers, with the addition and multiplication defined above, forms a field.
+\begin{theorem}[Rules of arithmetic in $\C$]
+Addition and multiplication of complex numbers satisfy the following rules, for all $z,w,u\in\C$.
+\begin{enumerate}[label=(\arabic*)]
+\item \emph{Associativity of addition:} \quad $(z+w)+u = z+(w+u)$.
+\item \emph{Commutativity of addition:} \quad $z+w = w+z$.
+\item \emph{Zero:} the number $0=0+0i$ satisfies \quad $z+0 = z$.
+\item \emph{Opposite numbers:} for $z=a+bi$ the number $-z=(-a)+(-b)i$ satisfies \quad $z+(-z) = 0$.
+\item \emph{Associativity of multiplication:} \quad $(z\cdot w)\cdot u = z\cdot (w\cdot u)$.
+\item \emph{Commutativity of multiplication:} \quad $z\cdot w = w\cdot z$.
+\item \emph{One:} the number $1=1+0i$ satisfies \quad $z\cdot 1 = z$.
+\item \emph{Inverses:} if $z\neq 0$, then the number $\frac1z$ from the Inversion fact satisfies
+\quad $z\cdot\frac1z = 1$.
+\item \emph{Distributivity:} \quad $z\cdot(w+u) = z\cdot w + z\cdot u$.
+\end{enumerate}
 \end{theorem}
 
-\noindent The general notion of a field is made precise in the next chapter; the theorem above says precisely
-that $\C$ satisfies all of its axioms.
+\noindent These are exactly the rules we use, usually without thinking, when we compute with real numbers.
+So every familiar algebraic manipulation, such as expanding brackets, adding fractions, cancelling a non-zero
+factor or solving a linear equation $az=b$ with $a\neq 0$, works for complex numbers just as it does for
+real numbers.
 
 \section{Modulus, conjugate and the complex plane}
 
