@@ -12,6 +12,57 @@ i, \qquad \text{required to satisfy} \qquad i^2 = -1.
 Clearly $i$ is not a real number. As we shall see, adjoining $i$ to $\R$ produces a new number system — the
 complex numbers — in which \emph{every} polynomial equation has a solution.
 
+\paragraph{Born of a scandal: the cubic.} Historically, nobody extended $\R$ because of $x^2+1=0$. A
+quadratic equation with no solution was simply considered \emph{unsolvable}, and that was the end of it. The
+trouble began with \emph{cubic} equations in sixteenth-century Italy. Scipione del Ferro and Niccolò
+Tartaglia found a formula for solving them, which Gerolamo Cardano published in his \emph{Ars Magna} (1545):
+the equation $x^3 = px+q$ is solved by
+\[
+x = \sqrt[3]{\tfrac{q}{2} + \sqrt{\tfrac{q^2}{4} - \tfrac{p^3}{27}}}
+  + \sqrt[3]{\tfrac{q}{2} - \sqrt{\tfrac{q^2}{4} - \tfrac{p^3}{27}}}.
+\]
+
+\begin{warning}
+Try the formula on $x^3 = 15x+4$, i.e.\ $p=15$, $q=4$. It gives
+\[
+x = \sqrt[3]{2+\sqrt{-121}} + \sqrt[3]{2-\sqrt{-121}},
+\]
+which contains the square root of a \emph{negative} number. Yet $x=4$ plainly solves the equation, since
+$64 = 60+4$. The formula is right; it just speaks a language nobody understood yet.
+\end{warning}
+
+\noindent So complex numbers were not forced on mathematicians by quadratics without real roots. They were
+forced on them by cubics whose roots are perfectly real.
+
+\paragraph{Bombelli's ``wild thought''.} In 1572 Rafael Bombelli found a way out. He had no theory of
+complex numbers: no definition and no $i$. His idea, which he himself called a ``wild thought'', was to
+treat the meaningless symbol $\sqrt{-1}$ as if it were a number, to obey every ordinary rule of algebra,
+and to add one bookkeeping rule: $\big(\sqrt{-1}\big)^2=-1$.
+
+\begin{example}
+Expanding the cube by the binomial formula and then applying the bookkeeping rule twice gives
+\[
+\big(2+\sqrt{-1}\big)^3 = 8 + 12\sqrt{-1} + 6\big(\sqrt{-1}\big)^2 + \big(\sqrt{-1}\big)^3
+= 8 + 12\sqrt{-1} - 6 - \sqrt{-1} = 2 + 11\sqrt{-1} = 2+\sqrt{-121}.
+\]
+In the same way, $\big(2-\sqrt{-1}\big)^3 = 2-\sqrt{-121}$. So Bombelli could take
+\[
+\sqrt[3]{2+\sqrt{-121}} = 2+\sqrt{-1}, \qquad \sqrt[3]{2-\sqrt{-121}} = 2-\sqrt{-1},
+\]
+and Cardano's formula yields
+\[
+x = \big(2+\sqrt{-1}\big) + \big(2-\sqrt{-1}\big) = 4.
+\]
+\end{example}
+
+\noindent The strange symbol entered the computation, cancelled out, and delivered the honest, checkable
+answer $4$, all without any claim about what $\sqrt{-1}$ actually \emph{is}. That claim remained an unpaid
+debt for almost three centuries. Descartes dismissed the new numbers as ``imaginary'' in 1637, and the
+insult stuck as their name. Only in the nineteenth century, with Gauss's picture of complex numbers as
+points of the plane and Hamilton's definition of them as pairs of real numbers, was the debt finally paid.
+This chapter pays it too: our definition of $\C$ in the next section is precisely the licence for
+Bombelli's game.
+
 So much for the algebra — but why should a computer scientist care about numbers that mathematicians
 themselves long dismissed as ``imaginary''? Because complex numbers turned out to be one of the most
 practical inventions in the history of mathematics. You have already used them today, probably several
