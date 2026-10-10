@@ -7,7 +7,7 @@ of the complex numbers we have just met — and of $\Q$ and $\R$ before them —
 rules: operations that are associative, have a neutral element, and admit inverses. Abstracting this list
 leads to two of the most basic algebraic ``interfaces'': \emph{groups} and \emph{fields}. Every theorem we
 prove from the axioms alone is proved once, for all implementations simultaneously: for real numbers, for
-complex numbers, for residues modulo a prime, for invertible matrices.
+complex numbers and for residues modulo a prime.
 
 This is not abstraction for its own sake — the ``exotic'' implementations are precisely the ones running
 your digital life:
@@ -84,25 +84,11 @@ $\Z$.
 
 \begin{example}[A finite multiplicative group]
 For a prime $p$, the non-zero residues $\Z_p\setminus\{0\}=\{1,2,\ldots,p-1\}$ form an abelian group under
-multiplication modulo $p$. For $p=5$, for example, $2\cdot 3 = 6 \equiv 1 \pmod 5$, so $3$ is the inverse of
+multiplication modulo $p$ (this is proved in the next section, as part of the theorem that $\Z_p$ is a
+field). For $p=5$, for example, $2\cdot 3 = 6 \equiv 1 \pmod 5$, so $3$ is the inverse of
 $2$. Inverses allow us to solve linear equations exactly as in $\Q$ or $\R$: in $\Z_7$ the equation
 $2\cdot_7 x = 1$ has the unique solution $x = 4$ (indeed $2\cdot 4 = 8 \equiv 1 \pmod 7$), and
 $2 \cdot_7 x = 5$ is solved by multiplying both sides by $4$: $x = 4\cdot_7 5 = 6$.
-\end{example}
-
-\begin{example}[A non-abelian group]
-The set of all invertible $2\times 2$ real matrices with matrix multiplication forms a group, called the
-\emph{general linear group} $GL_2(\R)$ (matrices and their multiplication are treated in detail in
-Chapter~\ref{ch:matrices}). It is \emph{not} abelian; for instance
-\[
-\begin{pmatrix} 1 & 1\\ 0 & 1\end{pmatrix}
-\begin{pmatrix} 1 & 0\\ 1 & 1\end{pmatrix}
-=\begin{pmatrix} 2 & 1\\ 1 & 1\end{pmatrix}
-\neq
-\begin{pmatrix} 1 & 1\\ 1 & 2\end{pmatrix}
-=\begin{pmatrix} 1 & 0\\ 1 & 1\end{pmatrix}
-\begin{pmatrix} 1 & 1\\ 0 & 1\end{pmatrix}.
-\]
 \end{example}
 
 \begin{example}[The power-set group]

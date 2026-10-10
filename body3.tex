@@ -403,3 +403,80 @@ as computed in an earlier example. Hence every solution of $x+2y+3z=6$ has the f
 (1,1,1) + a\,(-2,1,0)+b\,(-3,0,1), \qquad a,b\in\R.
 \]
 \end{example}
+
+\section{Determinants and systems of linear equations}
+
+\begin{theorem}
+Let $AX=B$ be a system of $n$ linear equations with $n$ unknowns. Then $AX=B$ has a unique solution if and
+only if $\det(A)\neq 0$.
+\end{theorem}
+
+\begin{theorem}[Cramer's rule]
+Consider a system $AX=B$ with $n$ equations and $n$ unknowns, where $A$ is a square matrix of size
+$n\times n$. Let $A_{|i}$ denote the matrix obtained from $A$ by replacing its $i$-th column with the column
+$B$. If $\det(A)\neq 0$, then
+\[
+x_1 = \frac{\det(A_{|1})}{\det(A)}, \qquad
+x_2 = \frac{\det(A_{|2})}{\det(A)}, \qquad
+\ldots, \qquad
+x_n = \frac{\det(A_{|n})}{\det(A)}.
+\]
+\end{theorem}
+
+\begin{example}
+Consider the system $\{\,x+y = 1,\ x+2y = 0\,\}$. Here
+\[
+A = \left ( \begin{array}{cc} 1 & 1\\ 1 & 2 \end{array} \right ), \quad \det(A) = 1,
+\]
+\[
+A_{|1} = \left ( \begin{array}{cc} 1 & 1\\ 0 & 2 \end{array} \right ), \ \det(A_{|1}) = 2, \qquad
+A_{|2} = \left ( \begin{array}{cc} 1 & 1\\ 1 & 0 \end{array} \right ), \ \det(A_{|2}) = -1.
+\]
+Hence $x=\tfrac{2}{1}=2$ and $y=\tfrac{-1}{1}=-1$.
+\end{example}
+
+\begin{example}[Cramer's rule for a $3\times 3$ system]
+Consider the system
+\[
+\begin{aligned}
+x+y+z &= 2,\\ x-y+z &= 0,\\ x+y-z &= 0.
+\end{aligned}
+\]
+We compute
+\[
+\det(A) = \left| \begin{array}{ccc} 1 & 1 & 1\\ 1 & -1 & 1\\ 1 & 1 & -1 \end{array} \right| = 4,
+\qquad
+\det(A_{|1}) = \left| \begin{array}{ccc} 2 & 1 & 1\\ 0 & -1 & 1\\ 0 & 1 & -1 \end{array} \right| = 0,
+\]
+\[
+\det(A_{|2}) = \left| \begin{array}{ccc} 1 & 2 & 1\\ 1 & 0 & 1\\ 1 & 0 & -1 \end{array} \right| = 4,
+\qquad
+\det(A_{|3}) = \left| \begin{array}{ccc} 1 & 1 & 2\\ 1 & -1 & 0\\ 1 & 1 & 0 \end{array} \right| = 4.
+\]
+Hence $x = \tfrac04 = 0$, $y = \tfrac44 = 1$ and $z = \tfrac44 = 1$; a direct check confirms that $(0,1,1)$
+solves the system.
+\end{example}
+
+\section{Summary: invertibility criteria}
+
+The chapters so far have produced a remarkable list of ways of saying the same thing. It deserves to be
+collected in one place.
+
+\begin{theorem}[The invertible matrix theorem]
+For a square matrix $A$ of size $n\times n$ over a field $\K$ the following conditions are equivalent:
+\begin{enumerate}
+\item $A$ is invertible;
+\item $\det(A)\neq 0$;
+\item $\rank(A) = n$;
+\item the rows of $A$ (equivalently, the columns of $A$) are linearly independent, i.e.\ they form a basis
+of $\K^n$;
+\item the homogeneous system $AX = \0$ has only the trivial solution;
+\item for every $B\in\K^n$ the system $AX = B$ has exactly one solution, namely $X = A^{-1}B$.
+\end{enumerate}
+\end{theorem}
+
+\begin{remark}
+Each chapter has added a line to this list, and Chapter~\ref{ch:eigen} will add one more: \emph{$0$ is not
+an eigenvalue of $A$}. Checking any one of these conditions checks them all — this versatility is what
+makes the determinant test so ubiquitous in algorithms.
+\end{remark}
