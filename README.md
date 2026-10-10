@@ -20,11 +20,10 @@ slides (`02 complex numbers`, `03 vector spaces`, `04 matrices`,
 | `body_complex.tex` | Ch. 1 — Complex numbers (arithmetic, polar form, De Moivre, roots, polynomials) |
 | `body_groups_fields.tex` | Ch. 2 — Groups and fields (introduction) |
 | `body1.tex` | Ch. 3 — Vector spaces (subspaces, span, independence, basis, dimension) |
-| `body2.tex` | Ch. 4 — Matrices (operations, elementary operations, echelon form, rank) |
-| `body3.tex` | Ch. 5 — Systems of linear equations (incl. homogeneous systems) |
-| `body4.tex` | Ch. 6 — Determinants and matrix inversion (Laplace, Cramer) |
-| `body5.tex` | Ch. 7 — Linear mappings |
-| `body6.tex` | Ch. 8 — Eigenvalues and eigenvectors (incl. PageRank lecture and an AI outlook section) |
+| `body2.tex` | Ch. 4 — Matrices (operations, elementary operations, echelon form, rank, determinants, matrix inversion) |
+| `body3.tex` | Ch. 5 — Systems of linear equations (incl. homogeneous systems, Cramer's rule, invertibility criteria) |
+| `body4.tex` | Ch. 6 — Linear mappings |
+| `body5.tex` | Ch. 7 — Eigenvalues and eigenvectors (incl. PageRank lecture and an AI outlook section) |
 | `body_exercises.tex` | Ch. E — Exercises: the ten tutorial series (`../LAG_T_*.pdf`) transcribed in book notation |
 | `exercise-sheets/` | The same exercises, as standalone per-topic PDFs students can download individually (see its own README) |
 | `Eigenvectors.png`, `03fig01.png` | Figures used in the notes |

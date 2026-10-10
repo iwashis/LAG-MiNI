@@ -1,416 +1,368 @@
 \section{Motivation}
 
-The determinant compresses an entire $n\times n$ matrix into a single scalar that answers a remarkable
-number of yes/no questions at once. Is the matrix invertible? Does the system $AX=B$ have exactly one
-solution? Do these $n$ vectors form a basis of $\K^n$? Does the transformation collapse space onto
-something flatter? All of these questions are equivalent, and all reduce to checking $\det(A)\neq 0$ —
-which is why a determinant test appears in virtually every algorithm that must know whether a matrix is
-``degenerate''.
-
-For a computer scientist the determinant has a second life as a \emph{geometric} quantity:
+Having studied vector spaces — the objects of linear algebra — we now study the \emph{functions} between
+them. Not all functions, though: only the \emph{linear} ones, those that respect addition and scaling.
+This restriction looks severe, and that is exactly its charm. A linear mapping $\R^n\to\R^m$ is completely
+determined by its values on the $n$ basis vectors, so it can be stored as a matrix and evaluated by matrix
+multiplication. Compare: an arbitrary function on a million-dimensional space is unknowable, while a
+linear one is a finite table of numbers. Linearity is the price we pay to make functions computable — and
+an astonishing amount of computing fits within that budget:
 
 \begin{itemize}
-\item In 2D, $|\det(A)|$ is the \textbf{area} of the parallelogram spanned by the rows of $A$; in 3D it is
-a volume. A transformation with determinant $6$ magnifies every area six-fold; determinant $0$ means space
-gets flattened.
-\item The \textbf{sign} of the determinant detects \emph{orientation}. The test ``does point $C$ lie to
-the left or to the right of the line through $A$ and $B$?'' is the sign of a $2\times 2$ determinant; it
-is the basic primitive of computational geometry, executed millions of times inside convex-hull
-algorithms, triangulations, collision detection and map matching. In 3D rendering the same sign test
-(\emph{backface culling}) lets the GPU skip the triangles that face away from the camera.
-\item In graphics and machine learning, determinants of \emph{Jacobian} matrices track how transformations
-distort volume — the bookkeeping device behind texture mapping and behind generative ``normalizing flow''
-models.
+\item \textbf{3D graphics.} Every frame, a game engine pushes millions of vertices through the same
+pipeline: rotate the model, place it in the world, position the camera, project onto the screen. Each
+stage is a linear mapping, and the whole pipeline is their composition — which, by a central theorem of
+this chapter, is again a single matrix, precomputed once per frame and then applied cheaply to every
+vertex. This is why the graphics industry runs on matrix multiplication.
+\item \textbf{Neural networks.} Each layer of a neural network is a linear mapping followed by a fixed,
+very simple non-linear function. All of the network's learned knowledge is stored in the matrices of its
+linear parts.
+\item \textbf{Signals, robots, cameras.} Audio filters, the coordinate changes between a robot's joints
+and the room it stands in, and the projection performed by a camera are all linear mappings.
 \end{itemize}
 
-Part of the motivation is also a computational warning. The Laplace expansion defined below is
-mathematically fundamental but computationally explosive: applied naively it performs on the order of $n!$
-operations. The behaviour of determinants under row operations, established in this chapter, brings the
-cost down to that of Gaussian elimination, $O(n^3)$ — one of the nicest examples in this course of theory
-rescuing an algorithm. The same warning applies to the chapter's elegant closed formulas (Cramer's rule
-and the adjugate formula for $A^{-1}$): they are invaluable for insight and perfectly practical for small
-matrices, but for large ones the method of choice is, once again, row reduction.
+The second half of the chapter introduces the \emph{kernel} of a mapping (everything that is sent to zero)
+and its \emph{image} (everything it can produce). These measure the two ways a transformation loses
+information. The kernel is what becomes indistinguishable from nothing: projecting a 3D scene onto a 2D
+screen has the viewing direction in its kernel — which is precisely why a single photograph cannot tell
+you how far away things are. The image tells us which outputs are achievable at all. The chapter
+culminates in the \emph{rank--nullity theorem}, a conservation law for dimensions: what survives (the
+image) plus what is lost (the kernel) always adds up to what you started with. It is the theoretical heart
+of the question ``can this transformation be undone?'' — tying back to the invertible matrices of
+Chapter~\ref{ch:matrices} — and of data compression, where losing the right information is the whole
+point.
 
-\section{Determinants}
-
-To every square matrix $A \in \K^n_n$ over a field $\K$ one assigns a scalar from $\K$, denoted $|A|$ or
-$\det(A)$ and called \emph{the determinant of $A$}. For matrices of sizes $1\times 1$, $2\times 2$ and
-$3\times 3$ it is given by the explicit formulas
-\[
-\begin{aligned}
-| a_{11} | &= a_{11},\\[2pt]
-\left | \begin{array}{cc} a_{11} & a_{12}\\ a_{21} & a_{22} \end{array} \right | &= a_{11} a_{22} - a_{12} a_{21},\\[2pt]
-\left | \begin{array}{ccc}
-a_{11} & a_{12} & a_{13}\\ a_{21} & a_{22} & a_{23}\\ a_{31} & a_{32} & a_{33}
-\end{array} \right | &=
-a_{11} a_{22} a_{33} + a_{12} a_{23} a_{31}+a_{13} a_{21} a_{32}
-- a_{13}a_{22}a_{31} -a_{12} a_{21} a_{33} - a_{11} a_{23} a_{32}.
-\end{aligned}
-\]
-
-\begin{remark}
-The $3\times 3$ formula is known as the \emph{rule of Sarrus}: copy the first two columns to the right of
-the matrix; the three ``descending'' diagonal products are added and the three ``ascending'' ones
-subtracted. Beware: the rule has \emph{no} analogue for $n\geq 4$ — larger determinants are computed by
-the Laplace expansion defined below or, more efficiently, by row reduction.
-\end{remark}
-
-\begin{example}
-\[
-\left| \begin{array}{cc} 1 & 2\\ 3 & 4 \end{array} \right| = 1\cdot 4 - 2\cdot 3 = -2,
-\]
-and, applying the $3\times 3$ formula term by term,
-\[
-\left| \begin{array}{ccc} 2 & 1 & 3\\ 0 & 1 & -1\\ 1 & 2 & 1 \end{array} \right|
-= 2\cdot 1\cdot 1 + 1\cdot(-1)\cdot 1 + 3\cdot 0\cdot 2
-- 3\cdot 1\cdot 1 - 1\cdot 0\cdot 1 - 2\cdot(-1)\cdot 2
-= 2 - 1 + 0 - 3 - 0 + 4 = 2.
-\]
-\end{example}
-
-\begin{definition}[Laplace expansion]
-Let $A$ be an $n\times n$ matrix and let $A_{ij}$ denote the matrix obtained from $A$ by deleting the $i$-th
-row and the $j$-th column. For any fixed column index $j$ between $1$ and $n$,
-\[
-\det(A) = \sum_{i=1}^{n} (-1)^{i+j} a_{ij}\cdot \det(A_{ij}).
-\]
-This formula is the \emph{Laplace expansion along the $j$-th column}. In particular, for $j=1$,
-\[
-\det(A) = \sum_{i=1}^{n} (-1)^{i+1} a_{i 1}\cdot \det(A_{i 1}).
-\]
-\end{definition}
-
-\begin{remark}
-It is a non-trivial fact, which we accept without proof, that the result does not depend on the chosen
-column $j$ — so the recursive definition is consistent, and for sizes $2$ and $3$ it reproduces the
-explicit formulas above. Moreover, since $\det(A) = \det(A^T)$ (see the properties below), the determinant
-may equally well be expanded along any fixed \emph{row}:
-$\det(A) = \sum_{j=1}^{n} (-1)^{i+j} a_{ij}\cdot\det(A_{ij})$ for any fixed row index $i$. In practice one
-expands along the row or column containing the most zeros.
-\end{remark}
-
-\begin{example}
-We compute the determinant by expanding along the first column:
-\[
-\left | \begin{array}{ccc}
-1 & 2 & 3\\ 4 & 5 & 6\\ 7 & 8 & 9
-\end{array} \right |
-= 1\cdot\left | \begin{array}{cc} 5 & 6\\ 8 & 9 \end{array} \right |
-- 4 \cdot \left | \begin{array}{cc} 2 & 3\\ 8 & 9 \end{array} \right |
-+ 7\cdot \left | \begin{array}{cc} 2 & 3\\ 5 & 6 \end{array} \right | = 0.
-\]
-\end{example}
-
-\begin{fact}[Properties of determinants]
-Let $A$ be a square matrix of size $n\times n$. Then
-\begin{enumerate}
-\item $\det(A) = \det(A^T)$;
-\item $\det(A) = 0$ if $A$ has a zero row (or column) or two identical rows (or columns);
-\item $\det(A) = 0$ if and only if $\rank(A)<n$;
-\item $\det(A) = -\det(B)$ if $B$ is obtained from $A$ by a single row switch ($R_i\leftrightarrow R_j$);
-\item $\det(A) = \det(B)$ if $B$ is obtained from $A$ by a single row addition
-($R_i+k\cdot R_j\rightarrow R_i$);
-\item $\det(B) = k\cdot \det(A)$ if $B$ is obtained from $A$ by the row scaling $kR_i\rightarrow R_i$.
-\end{enumerate}
-The last three properties also hold for the corresponding elementary column operations.
-\end{fact}
-
-\begin{example}
-Using row operations to reach a triangular form:
-\[
-\left | \begin{array}{ccc}
-1 & 2 & 3\\ 4 & 5 & 6\\ 7 & 8 & 9
-\end{array} \right |
-\overset{R_2-4 R_1}{=}
-\left | \begin{array}{ccc}
-1 & 2 & 3\\ 0 & -3 & -6\\ 7 & 8 & 9
-\end{array} \right |
-\overset{R_3-7 R_1}{=}
-\left | \begin{array}{ccc}
-1 & 2 & 3\\ 0 & -3 & -6\\ 0 & -6 & -12
-\end{array} \right |
-= 2\cdot \left | \begin{array}{ccc}
-1 & 2 & 3\\ 0 & -3 & -6\\ 0 & -3 & -6
-\end{array} \right | = 2\cdot 0 = 0.
-\]
-\end{example}
-
-\begin{fact}
-The determinant of an upper (or lower) triangular matrix equals the product of the entries on its main
-diagonal. In particular this applies to diagonal matrices, and $\det( I_{n\times n} ) = 1$.
-\end{fact}
-
-\begin{example}
-\[
-\left| \begin{array}{ccc} 2 & 7 & -1\\ 0 & 3 & 5\\ 0 & 0 & -4 \end{array} \right| = 2\cdot 3\cdot (-4) = -24.
-\]
-Combined with row reduction, this fact gives an efficient general method of computing determinants: reduce
-the matrix to a triangular form, keeping track of how each operation changes the determinant, exactly as in
-the example above.
-\end{example}
-
-\begin{example}[A $4\times 4$ determinant]
-Row additions do not change the determinant, so
-\[
-\left| \begin{array}{cccc}
-1 & 2 & 0 & 1\\ 2 & 5 & 2 & 3\\ 1 & 2 & 1 & 2\\ 3 & 6 & 0 & 4
-\end{array} \right|
-\overset{\substack{R_2-2R_1\\ R_3-R_1\\ R_4-3R_1}}{=}
-\left| \begin{array}{cccc}
-1 & 2 & 0 & 1\\ 0 & 1 & 2 & 1\\ 0 & 0 & 1 & 1\\ 0 & 0 & 0 & 1
-\end{array} \right| = 1\cdot 1\cdot 1\cdot 1 = 1.
-\]
-For larger matrices this approach is dramatically faster than a direct Laplace expansion.
-\end{example}
-
-\begin{fact}[Multiplicativity]
-Let $A$ and $B$ be square matrices of size $n\times n$. Then $\det(A\cdot B) = \det(A)\cdot \det(B)$.
-\end{fact}
-
-\begin{warning}
-The determinant is \emph{not} additive: in general $\det(A+B)\neq \det(A)+\det(B)$. Note also that
-$\det(k\cdot A) = k^n\det(A)$ for an $n\times n$ matrix $A$: scaling the whole matrix scales \emph{each} of
-its $n$ rows.
-\end{warning}
-
-\begin{remark}[Geometric meaning]
-For a real $2\times 2$ matrix $A$, the absolute value $|\det(A)|$ is the area of the parallelogram spanned
-by the two rows (equivalently, the two columns) of $A$; the sign of the determinant records the orientation
-of this pair of vectors. Similarly, for a real $3\times 3$ matrix, $|\det(A)|$ is the volume of the
-parallelepiped spanned by the rows.
-\end{remark}
-
-\section{Determinants and systems of linear equations}
-
-\begin{theorem}
-Let $AX=B$ be a system of $n$ linear equations with $n$ unknowns. Then $AX=B$ has a unique solution if and
-only if $\det(A)\neq 0$.
-\end{theorem}
-
-\begin{theorem}[Cramer's rule]
-Consider a system $AX=B$ with $n$ equations and $n$ unknowns, where $A$ is a square matrix of size
-$n\times n$. Let $A_{|i}$ denote the matrix obtained from $A$ by replacing its $i$-th column with the column
-$B$. If $\det(A)\neq 0$, then
-\[
-x_1 = \frac{\det(A_{|1})}{\det(A)}, \qquad
-x_2 = \frac{\det(A_{|2})}{\det(A)}, \qquad
-\ldots, \qquad
-x_n = \frac{\det(A_{|n})}{\det(A)}.
-\]
-\end{theorem}
-
-\begin{example}
-Consider the system $\{\,x+y = 1,\ x+2y = 0\,\}$. Here
-\[
-A = \left ( \begin{array}{cc} 1 & 1\\ 1 & 2 \end{array} \right ), \quad \det(A) = 1,
-\]
-\[
-A_{|1} = \left ( \begin{array}{cc} 1 & 1\\ 0 & 2 \end{array} \right ), \ \det(A_{|1}) = 2, \qquad
-A_{|2} = \left ( \begin{array}{cc} 1 & 1\\ 1 & 0 \end{array} \right ), \ \det(A_{|2}) = -1.
-\]
-Hence $x=\tfrac{2}{1}=2$ and $y=\tfrac{-1}{1}=-1$.
-\end{example}
-
-\begin{example}[Cramer's rule for a $3\times 3$ system]
-Consider the system
-\[
-\begin{aligned}
-x+y+z &= 2,\\ x-y+z &= 0,\\ x+y-z &= 0.
-\end{aligned}
-\]
-We compute
-\[
-\det(A) = \left| \begin{array}{ccc} 1 & 1 & 1\\ 1 & -1 & 1\\ 1 & 1 & -1 \end{array} \right| = 4,
-\qquad
-\det(A_{|1}) = \left| \begin{array}{ccc} 2 & 1 & 1\\ 0 & -1 & 1\\ 0 & 1 & -1 \end{array} \right| = 0,
-\]
-\[
-\det(A_{|2}) = \left| \begin{array}{ccc} 1 & 2 & 1\\ 1 & 0 & 1\\ 1 & 0 & -1 \end{array} \right| = 4,
-\qquad
-\det(A_{|3}) = \left| \begin{array}{ccc} 1 & 1 & 2\\ 1 & -1 & 0\\ 1 & 1 & 0 \end{array} \right| = 4.
-\]
-Hence $x = \tfrac04 = 0$, $y = \tfrac44 = 1$ and $z = \tfrac44 = 1$; a direct check confirms that $(0,1,1)$
-solves the system.
-\end{example}
-
-\section{Matrix inversion}
+\section{Linear mappings}
 
 \begin{definition}
-Let $A$ be a square matrix of size $n\times n$. A matrix $B$ of the same size is called an \emph{inverse} of
-$A$ if
-\[
-A\cdot B = I_{n\times n}, \qquad B\cdot A = I_{n\times n}.
-\]
-If $A$ has an inverse, it is unique; it is denoted by $A^{-1}$.
+Let $\V$ and $\W$ be two vector spaces over a field $\K$. A mapping $F\colon \V\to \W$ is called a
+\emph{linear mapping} if it satisfies the following conditions:
+\begin{itemize}
+\item $F(\vv_1+\vv_2) = F(\vv_1)+F(\vv_2)$ for any $\vv_1,\vv_2\in \V$;
+\item $F(\lambda\cdot \vv) = \lambda \cdot F(\vv)$ for any $\vv\in \V$ and $\lambda\in \K$.
+\end{itemize}
 \end{definition}
 
-\begin{example}
-For $A = \left ( \begin{smallmatrix} 1 & 0\\ 0 & 2 \end{smallmatrix} \right )$ one checks that
-$A^{-1} = \left ( \begin{smallmatrix} 1 & 0\\ 0 & \tfrac12 \end{smallmatrix} \right )$.
-\end{example}
-
-\begin{warning}
-Not every matrix is invertible.
-\end{warning}
+For $\V=\W=\R$, every linear mapping from $\R$ to $\R$ is of the form $y = a\cdot x$ for some $a\in \R$.
+Standard examples of linear mappings include rotation by a fixed angle and scaling (length multiplication).
 
 \begin{theorem}
-A square matrix $A$ is invertible if and only if $\det(A)\neq 0$. If $A$ is invertible, then
-\[
-\det(A^{-1}) = \frac{1}{\det(A)}.
-\]
+For any linear mapping $F\colon \V\to \W$ we have $F(\0) = \0$.
 \end{theorem}
 
 \begin{proof}
-We prove the second statement. Since $\det(I) = 1$ and $\det(A\cdot B) = \det(A)\cdot \det(B)$, and since
-$A\cdot A^{-1} = I$ for invertible $A$, we get
-\[
-1 = \det(I) = \det(A\cdot A^{-1}) = \det(A)\cdot \det(A^{-1}). \qedhere
-\]
+$F(\0) = F(\0+\0) = F(\0)+F(\0)$, and adding $-F(\0)$ to both sides gives $\0 = F(\0)$.
 \end{proof}
 
-\begin{theorem}[Properties of the inverse]
-Let $A,B$ be invertible matrices of size $n\times n$ and let $k\neq 0$ be a scalar. Then $A^{-1}$,
-$A\cdot B$, $A^T$ and $k\cdot A$ are all invertible, and
+\begin{theorem}
+A mapping $F\colon \V\to \W$ is linear if and only if
 \[
-(A^{-1})^{-1} = A, \qquad (A\cdot B)^{-1} = B^{-1}\cdot A^{-1}, \qquad (A^T)^{-1} = (A^{-1})^T,
-\qquad (k\cdot A)^{-1} = \tfrac1k\cdot A^{-1}.
+F(\lambda\cdot \vv_1 + \vv_2) = \lambda\cdot F(\vv_1) + F(\vv_2) \quad \text{for any } \vv_1,\vv_2\in \V \text{ and any } \lambda\in \K.
 \]
 \end{theorem}
 
+\begin{example}
+The mapping $f\colon\R^3\to \R^2$ given by $f(x,y,z) = (x+y,\,z-x)$ is linear. Indeed, for
+$\vv_1 = (x_1,y_1,z_1)$ and $\vv_2 = (x_2,y_2,z_2)$,
+\[
+f(\vv_1+\vv_2) = \big((x_1+x_2)+(y_1+y_2),\ (z_1+z_2)-(x_1+x_2)\big)
+= (x_1+y_1,\,z_1-x_1)+(x_2+y_2,\,z_2-x_2) = f(\vv_1)+f(\vv_2),
+\]
+and similarly $f(\lambda x,\lambda y,\lambda z) = (\lambda x+\lambda y,\ \lambda z-\lambda x)
+= \lambda\cdot f(x,y,z)$.
+\end{example}
+
 \begin{warning}
-Note the reversed order in $(A\cdot B)^{-1} = B^{-1}\cdot A^{-1}$ — the same reversal as in the transpose
-formula $(A\cdot B)^T = B^T\cdot A^T$.
+The mapping $f\colon\R^3\to \R^2$ given by $f(x,y,z) = (x+y,\,2z+1)$ is \emph{not} linear: indeed
+$f(0,0,0)=(0,1)\neq (0,0)$. The mapping $g(x,y,z) = (x^2,\,y)$ is not linear either, even though
+$g(0,0,0)=(0,0)$: we have $g(2,0,0) = (4,0)$, whereas $2\cdot g(1,0,0) = (2,0)$.
 \end{warning}
 
-\begin{example}[The general linear group]
-Recall the notion of a group from Chapter~\ref{ch:groups-fields}. By the theorem above, a product of two
-invertible $n\times n$ matrices is invertible, and so is the inverse of an invertible matrix; moreover,
-matrix multiplication is associative and $I$ is invertible. Hence the set of all invertible $n\times n$
-matrices over $\K$, with matrix multiplication, is a group, called the \emph{general linear group}
-$GL_n(\K)$. For $n\geq 2$ it is \emph{not} abelian; for instance, in $GL_2(\R)$,
+\begin{example}[Differentiation is linear]
+Linear mappings need not involve tuples of numbers. On the vector space $\R_n[x]$ of polynomials of degree
+at most $n$, the differentiation map
 \[
-\begin{pmatrix} 1 & 1\\ 0 & 1\end{pmatrix}
-\begin{pmatrix} 1 & 0\\ 1 & 1\end{pmatrix}
-=\begin{pmatrix} 2 & 1\\ 1 & 1\end{pmatrix}
-\neq
-\begin{pmatrix} 1 & 1\\ 1 & 2\end{pmatrix}
-=\begin{pmatrix} 1 & 0\\ 1 & 1\end{pmatrix}
-\begin{pmatrix} 1 & 1\\ 0 & 1\end{pmatrix}.
+D\colon \R_n[x]\to\R_n[x], \qquad D(f) = f',
 \]
-This is our first example of a non-abelian group.
+is linear, since $(f+g)' = f'+g'$ and $(\lambda f)' = \lambda\cdot f'$. The same is true of many other
+operations of calculus — integration over a fixed interval, evaluation at a fixed point — which is why
+linear algebra is the natural language of so much of analysis.
 \end{example}
 
-\begin{fact}[Inversion by row reduction]
-Let $A$ be a square matrix of size $n\times n$. Form the $n\times 2n$ matrix $C=(A\mid I_{n\times n})$ and row reduce
-it to the form $(I_{n\times n}\mid B)$. Such a reduction is possible if and only if $A$ is invertible, and
-the resulting matrix $B$ is the inverse of $A$.
-\end{fact}
+\section{Linear mappings and matrices}
+
+We focus on linear mappings $F\colon\K^n\to \K^m$; the general case is similar but symbolically more involved.
+We write all vectors as columns.
+
+\begin{theorem}
+Let $A$ be an $m\times n$ matrix over $\K$. The mapping $F\colon\K^n\to \K^m$ defined by
+\[
+F(\vv) = A\cdot \vv \qquad (\vv\in \K^n)
+\]
+is a linear mapping.
+\end{theorem}
 
 \begin{example}
+For $A=\left(\begin{smallmatrix} 1 & 2 & 0 \\ -1 & 1 & 1 \end{smallmatrix} \right)$ the mapping
+$F(\vv)=A\cdot \vv$ is, written out explicitly,
 \[
-\left ( \begin{array}{cc|cc}
-1 & 0 & 1 & 0 \\ 2 & 2 & 0 & 1
-\end{array} \right )
-\xrightarrow{R_2-2R_1\to R_2}
-\left ( \begin{array}{cc|cc}
-1 & 0 & 1 & 0 \\ 0 & 2 & -2 & 1
-\end{array} \right )
-\xrightarrow{\frac{1}{2}R_2\to R_2}
-\left ( \begin{array}{cc|cc}
-1 & 0 & 1 & 0 \\ 0 & 1 & -1 & \tfrac{1}{2}
-\end{array} \right ),
+F\!\left( \begin{array}{c} x \\ y \\ z \end{array} \right) =
+\left( \begin{array}{c} x+2y \\ -x+y+z \end{array} \right),
+\qquad\text{i.e.}\qquad F(x,y,z) = (x+2y,\, -x+y+z).
 \]
-so $\left ( \begin{smallmatrix} 1 & 0\\ 2 & 2 \end{smallmatrix} \right )^{-1}
-= \left ( \begin{smallmatrix} 1 & 0\\ -1 & \tfrac{1}{2} \end{smallmatrix} \right )$.
 \end{example}
 
-\begin{example}[A $3\times 3$ inverse]
-We invert $A = \left ( \begin{smallmatrix} 1 & 0 & 1\\ 1 & 1 & 0\\ 0 & 1 & 1 \end{smallmatrix} \right )$:
+Conversely, every linear mapping $\K^n\to\K^m$ arises from a matrix in this way.
+
+\begin{theorem}
+Let $F\colon\K^n \to \K^m$ be a linear mapping and let $M(F)$ be the matrix whose columns are the images of
+the standard basis vectors:
 \[
-\left ( \begin{array}{ccc|ccc}
-1 & 0 & 1 & 1 & 0 & 0\\ 1 & 1 & 0 & 0 & 1 & 0\\ 0 & 1 & 1 & 0 & 0 & 1
-\end{array} \right )
-\xrightarrow{R_2-R_1\to R_2}
-\left ( \begin{array}{ccc|ccc}
-1 & 0 & 1 & 1 & 0 & 0\\ 0 & 1 & -1 & -1 & 1 & 0\\ 0 & 1 & 1 & 0 & 0 & 1
-\end{array} \right )
-\xrightarrow{R_3-R_2\to R_3}
-\left ( \begin{array}{ccc|ccc}
-1 & 0 & 1 & 1 & 0 & 0\\ 0 & 1 & -1 & -1 & 1 & 0\\ 0 & 0 & 2 & 1 & -1 & 1
-\end{array} \right )
+M(F) = \big(\, F(e_1)\ \ F(e_2)\ \ \ldots\ \ F(e_n) \,\big),
+\qquad e_1 = (1,0,\ldots,0)^T,\ \ldots,\ e_n = (0,\ldots,0,1)^T.
 \]
+Then $F(\vv) = M(F)\cdot \vv$ for every $\vv\in \K^n$.
+\end{theorem}
+
+\begin{example}
+Consider the linear mapping $F\colon\R^3\to \R^2$ given by $F(x,y,z) = (x+y,\,z-x)$. Then
 \[
-\xrightarrow{\frac12 R_3\to R_3}
-\left ( \begin{array}{ccc|ccc}
-1 & 0 & 1 & 1 & 0 & 0\\ 0 & 1 & -1 & -1 & 1 & 0\\ 0 & 0 & 1 & \tfrac12 & -\tfrac12 & \tfrac12
-\end{array} \right )
-\xrightarrow{\substack{R_2+R_3\to R_2\\ R_1-R_3\to R_1}}
-\left ( \begin{array}{ccc|ccc}
-1 & 0 & 0 & \tfrac12 & \tfrac12 & -\tfrac12\\
-0 & 1 & 0 & -\tfrac12 & \tfrac12 & \tfrac12\\
-0 & 0 & 1 & \tfrac12 & -\tfrac12 & \tfrac12
-\end{array} \right ),
+F(1,0,0)=(1,-1), \quad F(0,1,0)=(1,0), \quad F(0,0,1)=(0,1),
 \]
 so
 \[
-A^{-1} = \frac12 \left ( \begin{array}{ccc} 1 & 1 & -1\\ -1 & 1 & 1\\ 1 & -1 & 1 \end{array} \right ).
+M(F) = \left( \begin{array}{ccc} 1 & 1 & 0 \\ -1 & 0 & 1 \end{array} \right).
 \]
-One can (and always should) verify the result by checking that $A\cdot A^{-1} = I$.
 \end{example}
 
-\begin{fact}[Inversion by determinants]
-Let $A$ be an invertible square matrix and let $A_{k,m}$ denote the matrix obtained from $A$ by deleting its
-$k$-th row and $m$-th column. Then
+The standard basis is not special here: a linear mapping may be prescribed freely on \emph{any} basis.
+
+\begin{theorem}
+Let $\V$ and $\W$ be vector spaces over $\K$, let $\{\vv_1,\ldots,\vv_n\}$ be a basis of $\V$ and let
+$\ww_1,\ldots,\ww_n\in \W$ be arbitrary vectors. Then there exists exactly one linear mapping
+$F\colon \V\to \W$ with $F(\vv_i) = \ww_i$ for $i=1,\ldots,n$, namely
 \[
-A^{-1} = \frac{1}{|A|}\cdot
-\left( \begin{array}{cccc}
-(-1)^{1+1} |A_{11}| & (-1)^{1+2} |A_{12}| & \ldots & (-1)^{1+n} |A_{1n}| \\
-(-1)^{2+1} |A_{21}| & (-1)^{2+2} |A_{22}| & \ldots & (-1)^{2+n} |A_{2n}| \\
-\vdots & \vdots & \ddots & \vdots \\
-(-1)^{n+1} |A_{n1}| & (-1)^{n+2} |A_{n2}| & \ldots & (-1)^{n+n}|A_{nn}|
-\end{array} \right)^T.
+F(a_1\vv_1+\ldots+a_n\vv_n) = a_1\ww_1+\ldots+a_n\ww_n.
 \]
-\end{fact}
+\end{theorem}
 
 \begin{example}
+Find the formula for the linear mapping $F\colon\R^2\to\R^2$ such that $F(1,1) = (2,0)$ and
+$F(1,-1) = (0,4)$. Writing an arbitrary vector in the basis $\{(1,1),(1,-1)\}$,
 \[
-\left ( \begin{array}{cc} 1 & 0 \\ 2 & 2 \end{array} \right )^{-1}
-= \frac{1}{2} \left ( \begin{array}{cc}
-|(2)| & -|(2)| \\ -|(0)| & |(1)|
-\end{array} \right )^T
-= \frac{1}{2} \left ( \begin{array}{cc} 2 & 0 \\ -2 & 1 \end{array} \right )
-= \left ( \begin{array}{cc} 1 & 0 \\ -1 & \tfrac12 \end{array} \right ).
+(x,y) = \tfrac{x+y}{2}\,(1,1) + \tfrac{x-y}{2}\,(1,-1),
 \]
+we get, by linearity,
+\[
+F(x,y) = \tfrac{x+y}{2}\,(2,0) + \tfrac{x-y}{2}\,(0,4) = (x+y,\ 2x-2y).
+\]
+A quick check: $F(1,1) = (2,0)$ and $F(1,-1) = (0,4)$, as required.
 \end{example}
 
-\begin{fact}[Inverse of a $2\times 2$ matrix]
-Let $A= \left ( \begin{smallmatrix} a & b \\ c & d \end{smallmatrix} \right )$ with
-$\det(A) = ad-bc \neq 0$. Then
+\section{Geometric interpretation}
+
+Given a vector $\vv\in \K^n$ and an $m\times n$ matrix $A$, the product $A\vv$ may be thought of as the image
+of $\vv$ under the mapping $A$.
+
+\begin{example}[Rotation]
+Fix $\alpha\in [0,2\pi)$ and consider the matrix
 \[
-A^{-1} = \frac{1}{ad-bc}\cdot \left( \begin{array}{cc} d & -b \\ -c & a \end{array} \right ).
+R_\alpha = \left( \begin{array}{cc} \cos \alpha & -\sin \alpha \\ \sin \alpha & \cos \alpha \end{array} \right).
 \]
-\end{fact}
+For a vector $\vv = \left( \begin{smallmatrix} x \\ y \end{smallmatrix} \right)$ the image
+\[
+R_\alpha\vv = \left( \begin{array}{c} x\cos\alpha - y\sin\alpha \\ x\sin\alpha + y\cos\alpha \end{array} \right)
+\]
+is the vector $\vv$ rotated about the origin by the angle $\alpha$.
+\end{example}
 
-\section{Summary: invertibility criteria}
+\begin{example}[Scaling]
+Consider the matrix $A = \left( \begin{smallmatrix} 3 & 0 \\ 0 & 2 \end{smallmatrix} \right)$. For a vector
+$\vv = \left( \begin{smallmatrix} x \\ y \end{smallmatrix} \right)$ the image is
+$A\vv = \left( \begin{smallmatrix} 3x \\ 2y \end{smallmatrix} \right)$, i.e.\ $\vv$ stretched by the factor
+$3$ in the $x$-direction and $2$ in the $y$-direction.
+\end{example}
 
-The chapters so far have produced a remarkable list of ways of saying the same thing. It deserves to be
-collected in one place.
+\begin{example}[Reflection and projection]
+The matrix $\left( \begin{smallmatrix} 1 & 0 \\ 0 & -1 \end{smallmatrix} \right)$ maps
+$\left( \begin{smallmatrix} x \\ y \end{smallmatrix} \right)$ to
+$\left( \begin{smallmatrix} x \\ -y \end{smallmatrix} \right)$: it is the \emph{reflection} across the
+$x$-axis. The matrix $\left( \begin{smallmatrix} 1 & 0 \\ 0 & 0 \end{smallmatrix} \right)$ maps
+$\left( \begin{smallmatrix} x \\ y \end{smallmatrix} \right)$ to
+$\left( \begin{smallmatrix} x \\ 0 \end{smallmatrix} \right)$: it is the \emph{orthogonal projection} onto
+the $x$-axis.
+\end{example}
 
-\begin{theorem}[The invertible matrix theorem]
-For a square matrix $A$ of size $n\times n$ over a field $\K$ the following conditions are equivalent:
-\begin{enumerate}
-\item $A$ is invertible;
-\item $\det(A)\neq 0$;
-\item $\rank(A) = n$;
-\item the rows of $A$ (equivalently, the columns of $A$) are linearly independent, i.e.\ they form a basis
-of $\K^n$;
-\item the homogeneous system $AX = \0$ has only the trivial solution;
-\item for every $B\in\K^n$ the system $AX = B$ has exactly one solution, namely $X = A^{-1}B$.
-\end{enumerate}
+\section{Composition of linear mappings}
+
+\begin{theorem}
+Let $F\colon \K^n\to\K^m$ and $G\colon \K^m\to\K^k$ be linear mappings. Then the composition
+$G\circ F\colon \K^n\to\K^k$ is linear, and
+\[
+M(G\circ F) = M(G)\cdot M(F).
+\]
 \end{theorem}
 
 \begin{remark}
-Each chapter has added a line to this list, and Chapter~\ref{ch:eigen} will add one more: \emph{$0$ is not
-an eigenvalue of $A$}. Checking any one of these conditions checks them all — this versatility is what
-makes the determinant test so ubiquitous in algorithms.
+Matrix multiplication is precisely composition of linear mappings — this is the real reason behind its
+seemingly complicated definition, and also an explanation of why it fails to be commutative: composing
+mappings in different orders usually produces different mappings.
 \end{remark}
+
+\begin{example}
+Composing the rotation by $\alpha$ with the rotation by $\beta$ gives the rotation by $\alpha+\beta$, so
+$R_\beta\cdot R_\alpha = R_{\alpha+\beta}$, that is,
+\[
+\left( \begin{array}{cc} \cos \beta & -\sin \beta \\ \sin \beta & \cos \beta \end{array} \right)
+\left( \begin{array}{cc} \cos \alpha & -\sin \alpha \\ \sin \alpha & \cos \alpha \end{array} \right)
+=
+\left( \begin{array}{cc} \cos(\alpha+\beta) & -\sin(\alpha+\beta) \\ \sin(\alpha+\beta) & \cos(\alpha+\beta) \end{array} \right).
+\]
+Comparing the entries of both sides recovers the trigonometric angle-addition formulas:
+\[
+\cos(\alpha + \beta) = \cos\alpha\cos\beta - \sin\alpha\sin\beta, \qquad
+\sin(\alpha + \beta) = \sin\alpha\cos\beta + \cos\alpha\sin\beta.
+\]
+\end{example}
+
+\section{Kernel and image}
+
+\begin{definition}
+Let $F\colon \V\to \W$ be a linear mapping. The \emph{kernel} and the \emph{image} of $F$ are the sets
+\[
+\ker(F) = \{\vv\in \V\mid F(\vv) = \0\}\subseteq \V, \qquad
+\operatorname{im}(F) = \{F(\vv)\mid \vv\in \V\}\subseteq \W.
+\]
+\end{definition}
+
+\begin{theorem}
+$\ker(F)$ is a subspace of $\V$ and $\operatorname{im}(F)$ is a subspace of $\W$.
+\end{theorem}
+
+\begin{proof}
+If $\vv_1,\vv_2\in\ker(F)$, then $F(\vv_1+\vv_2) = F(\vv_1)+F(\vv_2) = \0+\0 = \0$ and
+$F(\lambda \vv_1) = \lambda\cdot F(\vv_1) = \0$, so $\ker(F)$ is closed under addition and scalar
+multiplication; moreover $F(\0)=\0$ gives $\0\in\ker(F)$. For the image:
+$F(\vv_1)+F(\vv_2) = F(\vv_1+\vv_2)\in\operatorname{im}(F)$ and
+$\lambda\cdot F(\vv_1) = F(\lambda \vv_1)\in \operatorname{im}(F)$.
+\end{proof}
+
+\begin{remark}
+Let $F\colon \K^n\to\K^m$ be linear with matrix $A = M(F)$. Then the kernel of $F$ is the solution space of
+the homogeneous system $AX = \0$, and the image of $F$ is the span of the columns of $A$. In particular,
+$\dim \operatorname{im}(F) = \rank(A)$.
+\end{remark}
+
+\begin{definition}
+Let $F\colon\V\to\W$ be a linear mapping. The \emph{rank} of $F$ is $\rank(F) = \dim\operatorname{im}(F)$,
+and the \emph{nullity} of $F$ is $\dim\ker(F)$.
+\end{definition}
+
+\begin{theorem}[Rank--nullity theorem]
+Let $F\colon \V\to \W$ be a linear mapping with $\dim(\V)<\infty$. Then
+\[
+\dim \ker(F) + \dim \operatorname{im}(F) = \dim(\V).
+\]
+\end{theorem}
+
+\begin{example}
+Let $F\colon\R^3\to \R^2$, $F(x,y,z) = (x+y,\,z-x)$, with the matrix
+$M(F) = \left( \begin{smallmatrix} 1 & 1 & 0 \\ -1 & 0 & 1 \end{smallmatrix} \right)$ computed earlier.
+The kernel consists of the solutions of $x+y = 0$, $z-x = 0$, so
+\[
+\ker(F) = \{(t,-t,t)\mid t\in\R\} = \Span{\{(1,-1,1)\}}, \qquad \dim\ker(F) = 1.
+\]
+Since $\rank M(F) = 2$, the image is a $2$-dimensional subspace of $\R^2$, i.e.\
+$\operatorname{im}(F) = \R^2$ and $F$ is surjective. The rank--nullity theorem confirms the count:
+$1 + 2 = 3 = \dim(\R^3)$.
+\end{example}
+
+\begin{example}[Kernel and image of differentiation]
+For the differentiation map $D\colon\R_n[x]\to\R_n[x]$ with $n\geq 1$: the kernel consists of the
+polynomials with zero derivative, i.e.\ the constants, so $\dim\ker(D) = 1$. The image consists of exactly
+the polynomials of degree at most $n-1$ (every such polynomial is the derivative of one of its
+antiderivatives, which again lies in $\R_n[x]$), so $\dim\operatorname{im}(D) = n$. The rank--nullity
+theorem checks out: $1+n = n+1 = \dim(\R_n[x])$.
+\end{example}
+
+\begin{fact}
+A linear mapping $F\colon \V\to \W$ is injective (one-to-one) if and only if $\ker(F) = \{\0\}$.
+\end{fact}
+
+\begin{proof}
+If $F$ is injective, then $F(\vv) = \0 = F(\0)$ forces $\vv = \0$. Conversely, assume $\ker(F)=\{\0\}$ and
+$F(\vv_1) = F(\vv_2)$. Then $F(\vv_1-\vv_2) = \0$, so $\vv_1-\vv_2\in\ker(F) = \{\0\}$, that is
+$\vv_1 = \vv_2$.
+\end{proof}
+
+\section{Matrices in arbitrary bases}
+
+The matrix $M(F)$ was built from the standard basis of $\K^n$. Often another basis is better suited to the
+problem — finding a basis in which the matrix of a mapping becomes as simple as possible is the theme of
+Chapter~\ref{ch:eigen} — so we now allow arbitrary bases. Recall from Chapter~\ref{ch:vector-spaces} that
+every vector has unique coordinates in a fixed basis.
+
+\begin{definition}
+Let $F\colon \V\to \W$ be a linear mapping, let $S = (\vv_1,\ldots,\vv_n)$ be a basis of $\V$ and let
+$R = (\ww_1,\ldots,\ww_m)$ be a basis of $\W$. The \emph{matrix of $F$ with respect to the bases $S$ and
+$R$}, denoted $M_S^R(F)$, is the $m\times n$ matrix whose $j$-th column consists of the coordinates of
+$F(\vv_j)$ in the basis $R$. For an operator $F\colon\V\to\V$ considered with a single basis $S$ we write
+$M_S(F) = M_S^S(F)$.
+\end{definition}
+
+\begin{theorem}
+With the notation above: if $x\in\K^n$ is the column of coordinates of $\vv$ in the basis $S$, then
+$M_S^R(F)\cdot x$ is the column of coordinates of $F(\vv)$ in the basis $R$.
+\end{theorem}
+
+\begin{example}
+Let $F\colon\R^2\to\R^2$, $F(x,y) = (x+y,\ x-y)$, and let $S = \big((1,1),(1,0)\big)$.
+\begin{itemize}
+\item Taking $R$ to be the standard basis: $F(1,1) = (2,0)$ and $F(1,0) = (1,1)$, so
+$M_S^R(F) = \left( \begin{smallmatrix} 2 & 1\\ 0 & 1 \end{smallmatrix} \right)$.
+\item Taking the basis $S$ on both sides, we express the images in $S$:
+$F(1,1) = (2,0) = 0\cdot(1,1)+2\cdot (1,0)$ and $F(1,0) = (1,1) = 1\cdot (1,1) + 0\cdot (1,0)$, so
+$M_S(F) = \left( \begin{smallmatrix} 0 & 1\\ 2 & 0 \end{smallmatrix} \right)$.
+\end{itemize}
+\end{example}
+
+\begin{definition}
+Let $S = (\vv_1,\ldots,\vv_n)$ and $R$ be two bases of $\V$. The \emph{change-of-basis matrix} from $S$ to
+$R$ is the matrix $P$ whose $j$-th column consists of the coordinates of $\vv_j$ in the basis $R$ — in
+other words, $P = M_S^R(\operatorname{id})$, the matrix of the identity mapping.
+\end{definition}
+
+\begin{theorem}[Change of basis]
+Let $F\colon\V\to\V$ be a linear operator, let $S$ and $R$ be bases of $\V$, and let $P$ be the
+change-of-basis matrix from $S$ to $R$. Then $P$ is invertible and
+\[
+M_S(F) = P^{-1}\cdot M_R(F)\cdot P.
+\]
+\end{theorem}
+
+\begin{definition}
+Square matrices $A$ and $B$ are called \emph{similar} if $A = P^{-1}\cdot B\cdot P$ for some invertible
+matrix $P$. By the theorem above, similar matrices are exactly the matrices of one and the same linear
+operator written in different bases.
+\end{definition}
+
+\begin{example}
+Let $F\colon\R^2\to\R^2$ have the matrix
+$A = \left( \begin{smallmatrix} 2 & 1\\ 1 & 2 \end{smallmatrix} \right)$ in the standard basis $R$, and
+take $S = \big((1,1),(1,-1)\big)$. The change-of-basis matrix and its inverse are
+\[
+P = \left( \begin{array}{cc} 1 & 1\\ 1 & -1 \end{array} \right), \qquad
+P^{-1} = \frac12 \left( \begin{array}{cc} 1 & 1\\ 1 & -1 \end{array} \right),
+\]
+and we compute
+\[
+M_S(F) = P^{-1}\, A\, P
+= \frac12 \left( \begin{array}{cc} 1 & 1\\ 1 & -1 \end{array} \right)
+\left( \begin{array}{cc} 2 & 1\\ 1 & 2 \end{array} \right)
+\left( \begin{array}{cc} 1 & 1\\ 1 & -1 \end{array} \right)
+= \left( \begin{array}{cc} 3 & 0\\ 0 & 1 \end{array} \right).
+\]
+In the basis $S$ the mapping is simply ``stretch the first coordinate by $3$, keep the second'': the
+matrix became \emph{diagonal}. Finding such bases systematically is precisely the subject of the next
+chapter.
+\end{example}
