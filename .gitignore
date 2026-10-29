@@ -6,3 +6,6 @@
 *.fls
 *.fdb_latexmk
 *.synctex.gz
+
+#Visual studio config
+.vs/

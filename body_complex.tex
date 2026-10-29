@@ -320,6 +320,33 @@ z_1 z_2 = |z_1|\,|z_2|\,\big(\cos (\varphi_1+\varphi_2) + i\sin(\varphi_1+\varph
 That is, multiplication multiplies the moduli and adds the arguments.
 \end{theorem}
 
+\begin{theorem}[Multiplication in polar form]
+Let $z_1=|z_1|(\cos \varphi_1 + i\sin\varphi_1)$ and $z_2=|z_2|(\cos \varphi_2 + i\sin\varphi_2)$. Then
+\[
+z_1 z_2 = |z_1|\,|z_2|\,\big(\cos (\varphi_1+\varphi_2) + i\sin(\varphi_1+\varphi_2)\big), \qquad
+\frac{z_1}{z_2} = \frac{|z_1|}{|z_2|}\,\big(\cos (\varphi_1-\varphi_2) + i\sin(\varphi_1-\varphi_2)\big).
+\]
+Thus, $|z_1 z_2| = |z_1||z_2|$ and $\arg(z_1 z_2) = \arg(z_1) + \arg(z_2)$.
+\end{theorem}
+
+\begin{proof}
+For the product of $z_1 z_2$:
+\begin{align*}
+z_1 z_2 &= |z_1|\,|z_2|(\cos \varphi_1 + i\sin\varphi_1) \cdot (\cos \varphi_2 + i\sin\varphi_2) \\
+&= |z_1|\,|z_2| \Big[ (\cos\varphi_1 \cos\varphi_2 - \sin\varphi_1 \sin\varphi_2) + i (\cos\varphi_1 \sin\varphi_2 + \sin\varphi_1 \cos\varphi_2) \Big].
+\end{align*}
+Applying the angle addition identities for sine and cosine:
+\[
+\cos(\varphi_1 + \varphi_2) = \cos\varphi_1 \cos\varphi_2 - \sin\varphi_1 \sin\varphi_2, \qquad
+\sin(\varphi_1 + \varphi_2) = \sin\varphi_1 \cos\varphi_2 + \cos\varphi_1 \sin\varphi_2,
+\]
+we obtain
+\[
+z_1 z_2 = |z_1|\,|z_2|\,\big(\cos (\varphi_1+\varphi_2) + i\sin(\varphi_1+\varphi_2)\big).
+\]
+
+\end{proof}
+
 \begin{remark}[Multiplication is rotation and scaling]
 The theorem has a geometric reading worth memorising: multiplying by $z = |z|(\cos\varphi+i\sin\varphi)$
 rotates the plane by the angle $\varphi$ and scales it by the factor $|z|$. In particular, multiplication by
