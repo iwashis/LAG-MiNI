@@ -628,12 +628,16 @@ it is true, and it is a good answer to the question ``why did I have to learn th
 Machine learning begins by turning objects into vectors — here this is called an \emph{embedding}. Words,
 images, songs, users and products are all represented as elements of $\R^d$ for some dimension $d$
 (typically a few hundred to a few thousand), chosen so that geometric relations mirror semantic ones:
-similar objects lie close together, and meaningful differences correspond to directions. In good word
-embeddings the vector arithmetic of Chapter~\ref{ch:vector-spaces} captures analogy —
+similar objects lie close together, and meaningful differences correspond to directions. The structure
+is regular enough that \emph{linear maps} (Chapter~\ref{ch:linear-mappings}) act on meaning: word embeddings
+trained separately on English and Spanish text turn out to be related, to a good approximation, by a
+single matrix $W$ with
 \[
-\text{\itshape king} - \text{\itshape man} + \text{\itshape woman} \approx \text{\itshape queen}
+W\cdot x_{\text{\itshape cat}} \approx x_{\text{\itshape gato}},\qquad
+W\cdot x_{\text{\itshape five}} \approx x_{\text{\itshape cinco}},\ \ldots
 \]
-holds literally, as an equation between vectors. An embedding of a vocabulary of $50\,000$ words into
+learned from a few thousand dictionary pairs and then used to translate words never seen in training.
+An embedding of a vocabulary of $50\,000$ words into
 $\R^{768}$ is nothing but a $50\,000\times 768$ matrix, learned from data, whose rows are the word
 vectors.
 

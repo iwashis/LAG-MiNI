@@ -8,13 +8,20 @@ text. Once data is a vector, geometry becomes a computational tool: similar user
 vectors, recommendation is finding neighbours, and classification is separating regions of a space that we
 cannot draw but can compute in.
 
-The operations we axiomatise in this chapter are meaningful operations on data. Adding vectors and scaling
-them is how images are blended and audio tracks are mixed. More strikingly, in word-vector models the sum
-and difference of vectors capture \emph{meaning}: the famous relation
-\[
-\text{\itshape king} - \text{\itshape man} + \text{\itshape woman} \approx \text{\itshape queen}
-\]
-is literally vector arithmetic in the sense of this chapter.
+The operations we axiomatise in this chapter are not abstractions invented for their own sake — each is
+something computers do to data billions of times a second.
+\begin{itemize}
+\item \emph{Scaling.} Turning up the volume multiplies every audio sample by the same number; dimming a
+photograph does the same to every pixel. Both are the product $\lambda\cdot v$ of a scalar and a vector.
+\item \emph{Addition and the opposite vector.} Mixing two audio tracks adds their sample vectors
+coordinate by coordinate. Noise-cancelling headphones, in their idealised form, record the ambient noise
+$n$ and play $-n$, so that the ear receives $s + n + (-n) = s$: the axiom $v + (-v) = \0$, at work inside
+your ears.
+\item \emph{Linear combinations.} A cross-fade from image $a$ to image $b$ in a video is the family
+$(1-t)\,a + t\,b$ for $t$ running from $0$ to $1$ — a straight line segment in $\R^{1\,000\,000}$.
+And every colour on your screen is a combination $r\cdot(1,0,0) + g\cdot(0,1,0) + b\cdot(0,0,1)$ of pure
+red, green and blue: the first \emph{basis} you ever used, probably without knowing it.
+\end{itemize}
 
 The deeper notions of the chapter answer a question every computer scientist should ask about data:
 \emph{how many numbers does it really take to describe it?}
